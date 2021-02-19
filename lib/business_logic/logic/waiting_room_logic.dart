@@ -1,4 +1,5 @@
 import 'package:strix/services/database/game_doc_abstract.dart';
+import 'package:strix/services/authorization//authorization_abstract.dart';
 import '../../services/service_locator.dart';
 import 'package:strix/business_logic/classes/room.dart';
 
@@ -15,7 +16,12 @@ class WaitingRoomLogic {
   }
 
   // leave game room if back button is pushed
-  Future<void> leaveGame(String roomID, String uid) async {
-    await _gameDoc.leaveGame(roomID: roomID, uid: uid);
+  Future<void> leaveGame(String roomID) async {
+    await _gameDoc.leaveGame(roomID: roomID);
+  }
+
+  // check if enough players are in game room to start
+  Future<bool> enoughPlayers(String roomID) async {
+    await _gameDoc.leaveGame(roomID: roomID);
   }
 }

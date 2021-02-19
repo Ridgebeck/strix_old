@@ -1,4 +1,7 @@
-const String roomCollection = 'rooms';
+const String roomsCollection = 'rooms';
+const String settingsCollection = 'settings';
 const String roomIDField = 'roomID';
-// TODO: read from settings page
-const int maximumPlayerCount = 4;
+const String gameIDField = 'gameID';
+
+// TODO: replace with selectable ID?
+const testingGameID = 1;

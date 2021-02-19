@@ -14,7 +14,7 @@ abstract class GameDoc {
   Future<String> joinGame({String roomID});
 
   // remove player from game room
-  Future<void> leaveGame({String roomID, String uid});
+  Future<void> leaveGame({String roomID});
 
   // return stream to room document (todo: game document content)
   Stream<Room> getDocStream({String roomID});

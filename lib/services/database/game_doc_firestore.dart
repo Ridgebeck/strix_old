@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:strix/business_logic/classes/hex_color.dart';
 import 'package:strix/business_logic/classes/room.dart';
 import 'package:strix/business_logic/classes/player.dart';
 import 'game_doc_abstract.dart';
@@ -10,8 +10,9 @@ import 'package:strix/config/constants.dart';
 // interaction with room document on Firestore
 class GameDocFirestore implements GameDoc {
   final Authorization _authorization = serviceLocator<Authorization>();
-  // Create a CollectionReference called that references the firestore games collection
-  final CollectionReference rooms = FirebaseFirestore.instance.collection(roomCollection);
+  // Create a CollectionReference that references the firestore rooms and settings collections
+  final CollectionReference rooms = FirebaseFirestore.instance.collection(roomsCollection);
+  final CollectionReference settings = FirebaseFirestore.instance.collection(settingsCollection);
 
   @override
   Future<String> addNewGame({String roomID}) async {
@@ -33,9 +34,26 @@ class GameDocFirestore implements GameDoc {
       // try to create new document
       try {
         // get current user ID
-        String uid = await _authorization.getCurrentUserID();
+        String uid = _authorization.getCurrentUserID();
 
         // get current game settings
+        final settingsQuerySnapShot =
+            await settings.where(gameIDField, isEqualTo: testingGameID).get();
+
+        // check if connection is up-to-date
+        if (settingsQuerySnapShot.metadata.isFromCache == true) {
+          // TODO: Error handling when connection is stale
+          print('No connection to database!');
+          return null;
+        }
+        // check if settings document is unique
+        else if (settingsQuerySnapShot.size != 1) {
+          return null;
+        }
+        // only proceed if just one document was found
+        else {
+          print(settingsQuerySnapShot.docs.single.data());
+        }
 
         // add new document with generated roomID
         DocumentReference docRef = await rooms.add({
@@ -44,9 +62,7 @@ class GameDocFirestore implements GameDoc {
           'opened': DateTime.now(),
           'players': [uid],
           'gameProgress': 'waiting',
-          // add title from settings
-          'gameTitle': 'The Stolen Painting',
-          //maximumPlayers: add from settings .players.length
+          'settings': settingsQuerySnapShot.docs.single.data(),
         });
 
         // return ID of room document
@@ -63,7 +79,7 @@ class GameDocFirestore implements GameDoc {
   Stream<Room> getDocStream({String roomID}) {
     // Stream of Document Snapshots from database
     Stream<DocumentSnapshot> docRefStream =
-        FirebaseFirestore.instance.collection(roomCollection).doc(roomID).snapshots();
+        FirebaseFirestore.instance.collection(roomsCollection).doc(roomID).snapshots();
     // return converted string
     return _createRoomIDStream(docRefStream);
   }
@@ -74,20 +90,25 @@ class GameDocFirestore implements GameDoc {
     await for (DocumentSnapshot docSnap in docRefStream) {
       // convert player list into standardized format
       List<Player> playerList = [];
-      for (String uid in docSnap.data()['players']) {
-        playerList.add(Player(
-          uid: uid,
-          name: 'ulli',
-          color: Colors.blue,
-          image: 'agent1.jpeg',
-        ));
+      for (int i = 0; i < docSnap.data()['players'].length; i++) {
+        //String uid in docSnap.data()['players']) {
+        playerList.add(
+          Player(
+            uid: docSnap.data()['players'][i],
+            name: docSnap.data()['settings']['players'][i]['name'],
+            color: HexColor.fromHex(docSnap.data()['settings']['players'][i]['color']),
+            image: docSnap.data()['settings']['players'][i]['image'],
+          ),
+        );
       }
 
       // convert all values into game class
       Room currentRoomData = Room(
-        gameTitle: docSnap.data()['gameTitle'],
+        gameTitle: docSnap.data()['settings']['gameTitle'],
         roomID: docSnap.data()[roomIDField],
         players: playerList,
+        minimumPlayers: docSnap.data()['settings']['minimumPlayers'],
+        maximumPlayers: docSnap.data()['settings']['maximumPlayers'],
         opened: docSnap.data()['opened'].toDate(),
         started: docSnap.data()['started'],
       );
@@ -119,12 +140,14 @@ class GameDocFirestore implements GameDoc {
           // check if player count is below limit
           List<String> playersList = List.from(snapshot.data()['players']);
 
-          if (playersList.length >= maximumPlayerCount) {
+          if (playersList.length >= snapshot.data()['settings']['minimumPlayers']) {
             // return error String
             return 'full';
           } else {
+            // get current user ID
+            String uid = _authorization.getCurrentUserID();
             // add new player
-            playersList.add('test UID');
+            playersList.add(uid);
             // perform an update on the document
             transaction.update(rooms.doc(docID), {
               'players': playersList,
@@ -144,7 +167,7 @@ class GameDocFirestore implements GameDoc {
   }
 
   @override
-  Future<void> leaveGame({String roomID, String uid}) async {
+  Future<void> leaveGame({String roomID}) async {
     // try to get document from games collection with typed in game ID
     final querySnapShot = await rooms.where(roomIDField, isEqualTo: roomID).get();
     // check if gameID exists
@@ -167,8 +190,29 @@ class GameDocFirestore implements GameDoc {
           print("Game does not exist!");
           return null;
         } else {
-          // find player entry
+          // get current user ID
+          String uid = _authorization.getCurrentUserID();
+          // get player list
           List<String> playersList = List.from(snapshot.data()['players']);
+          // check if last participant is leaving
+          print('length ${playersList.length}');
+          if (playersList.length == 1) {
+            print('last player leaving');
+            //TODO: warning?
+            // try to delete complete document
+            transaction.delete(rooms.doc(docID));
+            // TODO: error handling if delete does not work
+          } else {
+            print('participant leaving');
+            // try to remove player from list
+            playersList.remove(uid);
+            // TODO: error handling if uid is not found?
+            // perform an update on the document
+            transaction.update(rooms.doc(docID), {
+              'players': playersList,
+            });
+          }
+
           print(playersList);
         }
       });

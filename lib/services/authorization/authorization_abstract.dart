@@ -7,5 +7,5 @@ abstract class Authorization {
   Future<void> signInUserAnonymous();
 
   // get current user ID
-  Future<String> getCurrentUserID();
+  String getCurrentUserID();
 }

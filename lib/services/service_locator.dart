@@ -11,6 +11,10 @@ import 'authorization/authorization_firebase.dart';
 GetIt serviceLocator = GetIt.instance;
 
 Future<void> setupServices() async {
+  // initialize connection to Firebase
+  await Firebase.initializeApp();
+  // TODO: error handling during initialization
+
   // register services
   // interact with game doc via firestore
   serviceLocator.registerLazySingleton<GameDoc>(() => GameDocFirestore());
@@ -18,8 +22,4 @@ Future<void> setupServices() async {
   serviceLocator.registerLazySingleton<UserDoc>(() => UserDocFirestore());
   // handle authorization via firebase auth
   serviceLocator.registerLazySingleton<Authorization>(() => AuthorizationFirebase());
-
-  // initialize connection to Firebase
-  await Firebase.initializeApp();
-  // TODO: error handling during initialization
 }

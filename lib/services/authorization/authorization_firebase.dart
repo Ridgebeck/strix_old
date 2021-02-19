@@ -26,7 +26,7 @@ class AuthorizationFirebase implements Authorization {
   }
 
   @override
-  Future<String> getCurrentUserID() async {
+  String getCurrentUserID() {
     // TODO: error handling with getting UID
     return FirebaseAuth.instance.currentUser.uid;
   }
