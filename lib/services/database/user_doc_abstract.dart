@@ -3,7 +3,6 @@
 // It also makes testing and development easier because you can provide
 // a mock implementation or fake data.
 abstract class UserDoc {
-  // create new game with given gameID
-  // return docID of newly created game
+  // update user sign in data
   Future<void> updateUserSignIn({String uid});
 }

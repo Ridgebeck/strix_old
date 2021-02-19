@@ -20,7 +20,7 @@ class StartJoinScreen extends StatelessWidget {
                     print('ERROR: could not add new game');
                     // TODO: show error pop up when game cannot be created
                   } else {
-                    Navigator.of(context).pushNamed(WaitingRoomScreen.route_id);
+                    Navigator.of(context).pushNamed(WaitingRoomScreen.route_id, arguments: docID);
                   }
                 },
                 child: Text('start new game')),

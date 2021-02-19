@@ -5,34 +5,40 @@ import 'package:strix/ui/screens/waiting_room_screen.dart';
 
 class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
-    //final args = settings.arguments;
+    final args = settings.arguments;
     switch (settings.name) {
       case StartJoinScreen.route_id:
         return MaterialPageRoute(
           builder: (_) => StartJoinScreen(),
         );
       case WaitingRoomScreen.route_id:
-        return MaterialPageRoute(
-          builder: (_) => WaitingRoomScreen(),
-        );
+        if (args is String) {
+          return MaterialPageRoute(
+            builder: (_) => WaitingRoomScreen(docID: args),
+          );
+        }
+        return _errorRoute();
+
       case JoinGameScreen.route_id:
         return MaterialPageRoute(
           builder: (_) => JoinGameScreen(),
         );
 
       default:
-        return MaterialPageRoute(
-          builder: (_) => ErrorScreen(),
-        );
+        return _errorRoute();
     }
   }
-}
 
-class ErrorScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.red,
-    );
+  static Route<dynamic> _errorRoute() {
+    return MaterialPageRoute(builder: (_) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Error'),
+        ),
+        body: Center(
+          child: Text('ERROR'),
+        ),
+      );
+    });
   }
 }

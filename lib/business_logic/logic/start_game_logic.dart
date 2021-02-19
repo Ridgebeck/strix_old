@@ -12,13 +12,13 @@ class StartGameLogic {
   // save reference to local memory
   Future<String> addGame() async {
     // create random 6 letter game ID
-    String gameID = _getRandomString(6);
+    String roomID = _getRandomString(6);
     String docID;
 
     // try maximum 3 times
     for (int i = 0; i < 3; i++) {
-      // create new game with gameID
-      docID = await _gameDoc.addNewGame(gameID: gameID);
+      // create new game with roomID
+      docID = await _gameDoc.addNewGame(roomID: roomID);
       // exit for loop if docID is not null
       if (docID != null) {
         break;
@@ -32,7 +32,7 @@ class StartGameLogic {
     return docID;
   }
 
-  // function to create random gameID String
+  // function to create random roomID String
   String _getRandomString(int length) {
     const _chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     Random _rnd = Random();
