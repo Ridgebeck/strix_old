@@ -4,6 +4,7 @@ import 'package:strix/business_logic/logic/waiting_room_logic.dart';
 import 'package:strix/services/service_locator.dart';
 import 'package:strix/services/authorization/authorization_abstract.dart';
 import 'package:strix/config/constants.dart';
+import 'main_game_screen.dart';
 
 class WaitingRoomScreen extends StatelessWidget {
   static const String route_id = 'waiting_room_screen';
@@ -14,8 +15,6 @@ class WaitingRoomScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String roomID;
-
     return WillPopScope(
       // prevent going back via system
       onWillPop: () async => false,
@@ -23,6 +22,18 @@ class WaitingRoomScreen extends StatelessWidget {
         body: StreamBuilder(
             stream: WaitingRoomLogic().roomDocStream(docID),
             builder: (BuildContext context, AsyncSnapshot<Room> snapshot) {
+              // add callback to check for gamProgress change
+              // after every frame and move to game screen
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (snapshot.data != null && snapshot.data.gameProgress != waitingStatus) {
+                  // TODO: pop complete stack and move to main_layout
+                  // transfer roomID to main game screen via arguments
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                      MainGameScreen.route_id, (Route<dynamic> route) => false);
+                  //Navigator.pushNamed(context, MainGameScreen.route_id);
+                }
+              });
+
               if (snapshot.data == null) {
                 return Center(child: Text('NO DATA!'));
               } else {
@@ -64,32 +75,24 @@ class WaitingRoomScreen extends StatelessWidget {
                       children: [
                         FlatButton(
                           onPressed: () async {
-                            // TODO: display warning pop up
-                            // remove player entry from document
-                            await WaitingRoomLogic().leaveGame(roomID);
-                            // go back to page
-                            Navigator.pop(context);
+                            // leave the room
+                            await WaitingRoomLogic().leaveRoom(
+                              context: context,
+                              roomID: snapshot.data.roomID,
+                              numberPlayers: snapshot.data.players.length,
+                            );
                           },
                           child: Text('back'),
                         ),
                         FlatButton(
                           onPressed: () async {
-                            // check if enough players are in room
-                            print('LENGTH: ${snapshot.data.players.length}');
-                            if (snapshot.data.players.length < snapshot.data.minimumPlayers) {
-                              print(
-                                  'NOT ENOUGH PLAYERS, YOU NEED AT LEAST ${snapshot.data.minimumPlayers}');
-                              // TODO: display warning not enough players
-                            } else {
-                              // TODO: display warning to become host
-                              print('do you really want to start?');
-
-                              // start game via safe transaction
-                              // check if already started
-                              // check if enough players again
-
-                              // save player as host if start is successful
-                            }
+                            // try to start the game
+                            await WaitingRoomLogic().startGame(
+                              context: context,
+                              numberPlayers: snapshot.data.players.length,
+                              minimumPlayers: snapshot.data.minimumPlayers,
+                              roomID: snapshot.data.roomID,
+                            );
                           },
                           child: Text('start'),
                         ),

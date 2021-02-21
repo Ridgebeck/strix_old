@@ -7,15 +7,18 @@ import 'package:strix/business_logic/classes/room.dart';
 abstract class GameDoc {
   // create new game with given roomID
   // return docID of newly created game
-  Future<String> addNewGame({String roomID});
+  Future<String> addNewRoom({String roomID});
 
   // try to join a Room via roomID
   // return docID if successful, otherwise null
-  Future<String> joinGame({String roomID});
+  Future<String> joinRoom({String roomID});
 
   // remove player from game room
-  Future<void> leaveGame({String roomID});
+  Future<bool> leaveRoom({String roomID});
 
   // return stream to room document (todo: game document content)
   Stream<Room> getDocStream({String roomID});
+
+  // start game
+  Future<void> startGame({String roomID});
 }

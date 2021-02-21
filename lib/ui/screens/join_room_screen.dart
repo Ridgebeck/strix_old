@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:strix/business_logic/logic/join_game_logic.dart';
+import 'package:strix/business_logic/logic/join_room_logic.dart';
 import 'package:strix/ui/screens/waiting_room_screen.dart';
 
-class JoinGameScreen extends StatelessWidget {
-  static const String route_id = 'join_game_screen';
+class JoinRoomScreen extends StatelessWidget {
+  static const String route_id = 'join_room_screen';
 
   final textController = TextEditingController();
 
@@ -14,7 +14,7 @@ class JoinGameScreen extends StatelessWidget {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Text('Enter Game ID:'),
+          Text('Enter Room ID:'),
           TextFormField(
             maxLength: 6,
             textCapitalization: TextCapitalization.characters,
@@ -32,17 +32,7 @@ class JoinGameScreen extends StatelessWidget {
               FlatButton(
                 onPressed: () async {
                   // try to join game
-                  String docID = await JoinGameLogic().joinGame(roomID: textController.text);
-
-                  // display error or join room
-                  if (docID == 'full') {
-                    print('Could not join room. Room is full.');
-                  } else if (docID == null) {
-                    print('Error, can not join room!');
-                  } else {
-                    // navigate to waiting room
-                    Navigator.of(context).pushNamed(WaitingRoomScreen.route_id, arguments: docID);
-                  }
+                  await JoinRoomLogic().joinRoom(roomID: textController.text, context: context);
                 },
                 child: Text('join game'),
               ),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:strix/ui/screens/join_game_screen.dart';
+import 'package:strix/ui/screens/join_room_screen.dart';
 import 'package:strix/ui/screens/start_join_screen.dart';
 import 'package:strix/ui/screens/waiting_room_screen.dart';
+import 'package:strix/ui/screens/main_game_screen.dart';
 
 class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -18,10 +19,13 @@ class RouteGenerator {
           );
         }
         return _errorRoute();
-
-      case JoinGameScreen.route_id:
+      case JoinRoomScreen.route_id:
         return MaterialPageRoute(
-          builder: (_) => JoinGameScreen(),
+          builder: (_) => JoinRoomScreen(),
+        );
+      case MainGameScreen.route_id:
+        return MaterialPageRoute(
+          builder: (_) => MainGameScreen(),
         );
 
       default:
