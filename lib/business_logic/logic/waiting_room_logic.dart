@@ -70,7 +70,7 @@ class WaitingRoomLogic {
         //TODO: need return value for verification?
         await _gameDoc.startGame(roomID: roomID);
         // save player as host if start is successful (local and online?)
-        // TODO: Save player as host locally
+        // TODO: Save player as host locally?
       }
     }
   }

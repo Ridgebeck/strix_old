@@ -31,6 +31,7 @@ class JoinRoomScreen extends StatelessWidget {
               FlatButton(
                 onPressed: () async {
                   // try to join game
+                  // todo: replace Navigator in function
                   //await JoinRoomLogic().joinRoom(roomID: textController.text, context: context);
                 },
                 child: Text('join game'),

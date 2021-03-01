@@ -146,9 +146,11 @@ class WaitingRoomScreen extends StatelessWidget {
                                   numberPlayers: snapshot.data.players.length,
                                 );
                                 if (leave == true) {
-                                  changeStatus(statusType.landing);
-                                  // TODO: delete document after leaving page
-                                  print('DELETE ROOM DATA HERE!');
+                                  try {
+                                    changeStatus(statusType.landing);
+                                  } catch (e) {
+                                    print('Status already changed. Error: $e');
+                                  }
                                 }
                               },
                               child: Text('back'),

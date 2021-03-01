@@ -50,6 +50,7 @@ class JoinRoomLogic {
       );
     } else {
       // navigate to waiting room
+      // todo: change status variable instead
       //Navigator.of(context).pushNamed(WaitingRoomScreen.route_id, arguments: docID);
     }
   }
