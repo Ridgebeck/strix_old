@@ -76,7 +76,11 @@ class WaitingRoomLogic {
   }
 
   // try to leave game room if back button is pushed
-  Future<bool> leaveRoom({BuildContext context, String roomID, int numberPlayers}) async {
+  Future<bool> leaveRoom({
+    BuildContext context,
+    String roomID,
+    int numberPlayers,
+  }) async {
     bool leaving = true;
     if (numberPlayers == 1) {
       leaving = await showDialog(

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:strix/config/route_generator.dart';
 import 'package:strix/services/service_locator.dart';
 import 'package:strix/services/authorization/authorization_abstract.dart';
+import 'package:strix/ui/screens/game_setup.dart';
 import 'package:strix/ui/screens/main_game_screen.dart';
 import 'package:strix/ui/screens/start_join_screen.dart';
 
@@ -31,7 +32,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-      initialRoute: StartJoinScreen.route_id, // MainGameScreen.route_id,
+      initialRoute: GameSetup.route_id, //StartJoinScreen.route_id, // MainGameScreen.route_id,
       onGenerateRoute: RouteGenerator.generateRoute,
       theme: ThemeData(
         // This makes the visual density adapt to the platform that you run

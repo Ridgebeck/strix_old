@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:strix/business_logic/logic/join_room_logic.dart';
 import 'package:strix/ui/screens/waiting_room_screen.dart';
 
 class JoinRoomScreen extends StatelessWidget {
-  static const String route_id = 'join_room_screen';
-
+  // TODO: give status change function to class
   final textController = TextEditingController();
 
   @override
@@ -14,7 +12,7 @@ class JoinRoomScreen extends StatelessWidget {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Text('Enter Room ID:'),
+          Text('Enter Mission ID:'),
           TextFormField(
             maxLength: 6,
             textCapitalization: TextCapitalization.characters,
@@ -26,13 +24,14 @@ class JoinRoomScreen extends StatelessWidget {
             children: [
               FlatButton(
                   onPressed: () {
-                    Navigator.pop(context);
+                    //Navigator.pop(context);
+                    // TODO: replace with status change
                   },
                   child: Text('back')),
               FlatButton(
                 onPressed: () async {
                   // try to join game
-                  await JoinRoomLogic().joinRoom(roomID: textController.text, context: context);
+                  //await JoinRoomLogic().joinRoom(roomID: textController.text, context: context);
                 },
                 child: Text('join game'),
               ),

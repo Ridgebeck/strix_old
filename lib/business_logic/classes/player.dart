@@ -4,12 +4,12 @@ class Player {
   String name;
   String uid;
   Color color;
-  String image;
+  IconData iconData;
 
   Player({
     @required this.name,
     this.uid,
     this.color,
-    this.image,
+    this.iconData,
   });
 }

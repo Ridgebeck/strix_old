@@ -1,6 +1,7 @@
 import 'dart:async';
 //import 'dart:html';
 
+import 'package:flutter/cupertino.dart';
 import 'package:strix/business_logic/classes/hex_color.dart';
 import 'package:strix/business_logic/classes/room.dart';
 import 'package:strix/business_logic/classes/player.dart';
@@ -40,6 +41,7 @@ class GameDocFirestore implements GameDoc {
           kPlayersField: [_authorization.getCurrentUserID()],
           kGameStatusField: kWaitingStatus,
           kSettingsReference: settingsSnapshot.data(),
+          kChatField: [],
         });
         return roomID;
       }
@@ -57,10 +59,10 @@ class GameDocFirestore implements GameDoc {
 
     // return converted string
     return docRefStream
-        .map((docSnap) => convertSnapToRoom(docSnap)); //_createRoomIDStream(docRefStream);
+        .map((docSnap) => docSnapToRoom(docSnap)); //_createRoomIDStream(docRefStream);
   }
 
-  Room convertSnapToRoom(DocumentSnapshot docSnap) {
+  Room docSnapToRoom(DocumentSnapshot docSnap) {
     try {
       print('CONVERTING STREAM DATA! ${docSnap.data()['gameID']}');
 
@@ -69,12 +71,13 @@ class GameDocFirestore implements GameDoc {
       for (int i = 0; i < docSnap.data()[kPlayersField].length; i++) {
         Map<String, dynamic> currentPlayerRef =
             docSnap.data()[kSettingsReference][kPlayersField][i];
+
         playerList.add(
           Player(
             uid: docSnap.data()[kPlayersField][i],
             name: currentPlayerRef['name'],
             color: HexColor.fromHex(currentPlayerRef['color']),
-            image: currentPlayerRef['image'],
+            iconData: IconData(currentPlayerRef['iconNumber'], fontFamily: 'MaterialIcons'),
           ),
         );
       }
@@ -95,48 +98,6 @@ class GameDocFirestore implements GameDoc {
       print('Error while trying to create room data from stream.');
       print('Error: $e');
       return null;
-    }
-  }
-
-  // convert firestore data stream to stream of standardized data
-  Stream<Room> _createRoomIDStream(Stream<DocumentSnapshot> docRefStream) async* {
-    // create Stream of Strings (of roomID) and yield
-    await for (DocumentSnapshot docSnap in docRefStream) {
-      // try to create room data from snapshot
-      try {
-        print('CONVERTING STREAM DATA! ${docSnap.data()['gameID']}');
-
-        // convert player list into standardized format
-        List<Player> playerList = [];
-        for (int i = 0; i < docSnap.data()[kPlayersField].length; i++) {
-          Map<String, dynamic> currentPlayerRef =
-              docSnap.data()[kSettingsReference][kPlayersField][i];
-          playerList.add(
-            Player(
-              uid: docSnap.data()[kPlayersField][i],
-              name: currentPlayerRef['name'],
-              color: HexColor.fromHex(currentPlayerRef['color']),
-              image: currentPlayerRef['image'],
-            ),
-          );
-        }
-
-        // convert all values into room class
-        Room currentRoomData = Room(
-          gameTitle: docSnap.data()[kSettingsReference]['gameTitle'],
-          roomID: docSnap.data()[kRoomIDField],
-          gameProgress: docSnap.data()[kGameStatusField],
-          players: playerList,
-          minimumPlayers: docSnap.data()[kSettingsReference]['minimumPlayers'],
-          maximumPlayers: docSnap.data()[kSettingsReference]['maximumPlayers'],
-          opened: docSnap.data()['opened'].toDate(),
-          started: docSnap.data()['started'],
-        );
-        yield currentRoomData;
-      } catch (e) {
-        print('Error while trying to create room data from stream.');
-        print('Error: $e');
-      }
     }
   }
 

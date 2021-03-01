@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:strix/services/database/game_doc_abstract.dart';
 import 'package:strix/services/service_locator.dart';
-import 'package:strix/ui/screens/waiting_room_screen.dart';
+import 'package:strix/config/constants.dart';
 
 // This class handles the conversion and puts it in a form convenient
 // for displaying on a view (without knowing anything about any particular view).
@@ -50,7 +50,7 @@ class JoinRoomLogic {
       );
     } else {
       // navigate to waiting room
-      Navigator.of(context).pushNamed(WaitingRoomScreen.route_id, arguments: docID);
+      //Navigator.of(context).pushNamed(WaitingRoomScreen.route_id, arguments: docID);
     }
   }
 }

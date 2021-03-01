@@ -1,5 +1,11 @@
 import 'dart:ui' show Color;
 
+enum statusType {
+  landing,
+  waiting,
+  joining,
+}
+
 const String kRoomsCollection = 'activeRooms';
 const String kSettingsReference = 'settings'; // used for collection name and field name
 const String kRoomIDField = 'roomID';
@@ -9,6 +15,7 @@ const String kPlayersField = 'players';
 const String kGameStatusField = 'gameProgress';
 const String kSettingsStatusField = 'availableAssets'; // change to gameProgress
 const String kOpenedField = 'opened';
+const String kChatField = 'chatRoom';
 
 // TODO: replace with enum?
 const String kWaitingStatus = 'waiting';
