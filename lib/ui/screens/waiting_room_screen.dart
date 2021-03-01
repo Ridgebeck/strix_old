@@ -15,26 +15,33 @@ class WaitingRoomScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Stream<Room> roomStream = WaitingRoomLogic().roomDocStream(docID);
+
     return WillPopScope(
       // prevent going back via system
       onWillPop: () async => false,
       child: Scaffold(
         body: StreamBuilder(
-            stream: WaitingRoomLogic().roomDocStream(docID),
+            stream: roomStream,
             builder: (BuildContext context, AsyncSnapshot<Room> snapshot) {
               // add callback to check for gamProgress change
               // after every frame and move to game screen
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (snapshot.data != null && snapshot.data.gameProgress != waitingStatus) {
-                  // TODO: pop complete stack and move to main_layout
-                  // transfer roomID to main game screen via arguments
+                if (snapshot.data != null && snapshot.data.gameProgress != kWaitingStatus) {
+                  // pop complete stack and move to the main game screen
                   Navigator.of(context).pushNamedAndRemoveUntil(
-                      MainGameScreen.route_id, (Route<dynamic> route) => false);
-                  //Navigator.pushNamed(context, MainGameScreen.route_id);
+                      MainGameScreen.route_id, (Route<dynamic> route) => false,
+                      arguments: docID);
                 }
               });
 
-              if (snapshot.data == null) {
+              // check if stream is waiting for connection
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                // TODO: IMPLEMENT LOADING SCREEN
+                return Center(child: Text('LOADING!'));
+              }
+              // check if stream has no data
+              else if (snapshot.data == null) {
                 return Center(child: Text('NO DATA!'));
               } else {
                 return Center(
@@ -76,11 +83,14 @@ class WaitingRoomScreen extends StatelessWidget {
                         FlatButton(
                           onPressed: () async {
                             // leave the room
-                            await WaitingRoomLogic().leaveRoom(
+                            bool leave = await WaitingRoomLogic().leaveRoom(
                               context: context,
                               roomID: snapshot.data.roomID,
                               numberPlayers: snapshot.data.players.length,
                             );
+                            if (leave == true) {
+                              Navigator.pop(context);
+                            }
                           },
                           child: Text('back'),
                         ),

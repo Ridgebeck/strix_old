@@ -10,6 +10,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // fix app orientation to portrait mode
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarBrightness: Brightness.light,
+  ));
 
   // initialize all services (database, auth, storage)
   await setupServices();
@@ -25,8 +29,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-      initialRoute: StartJoinScreen.route_id, //MainGameScreen.route_id,
+      initialRoute: StartJoinScreen.route_id, // MainGameScreen.route_id,
       onGenerateRoute: RouteGenerator.generateRoute,
       theme: ThemeData(
         // This makes the visual density adapt to the platform that you run

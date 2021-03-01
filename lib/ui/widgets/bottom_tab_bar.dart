@@ -1,35 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:strix/config/constants.dart';
 
 class BottomTabBar extends StatelessWidget {
-  final int selectedIndex;
-  final Function onItemTapped;
-  BottomTabBar({
-    @required this.selectedIndex,
-    @required this.onItemTapped,
-  });
-
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home',
+    return TabBar(
+      indicatorColor: kAccentColor,
+      tabs: [
+        Tab(
+          text: 'Home',
+          icon: Icon(Icons.home_outlined),
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.cloud),
-          label: 'Data',
+        Tab(
+          text: 'Data',
+          icon: Icon(Icons.cloud_outlined),
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.search),
-          label: 'Tools',
+        Tab(
+          text: 'Tools',
+          icon: Icon(Icons.handyman_outlined),
+        ),
+        Tab(
+          text: 'Chat',
+          icon: Icon(Icons.chat_bubble_outline),
         ),
       ],
-      currentIndex: selectedIndex,
-      selectedItemColor: Colors.amber[800],
-      onTap: (value) {
-        onItemTapped(value);
-      },
     );
   }
 }

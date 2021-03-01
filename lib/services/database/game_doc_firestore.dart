@@ -1,3 +1,6 @@
+import 'dart:async';
+//import 'dart:html';
+
 import 'package:strix/business_logic/classes/hex_color.dart';
 import 'package:strix/business_logic/classes/room.dart';
 import 'package:strix/business_logic/classes/player.dart';
@@ -11,8 +14,8 @@ import 'package:strix/config/constants.dart';
 class GameDocFirestore implements GameDoc {
   final Authorization _authorization = serviceLocator<Authorization>();
   // Create a CollectionReference that references the firestore rooms and settings collections
-  final CollectionReference rooms = FirebaseFirestore.instance.collection(roomsCollection);
-  final CollectionReference settings = FirebaseFirestore.instance.collection(settingsReference);
+  final CollectionReference rooms = FirebaseFirestore.instance.collection(kRoomsCollection);
+  final CollectionReference settings = FirebaseFirestore.instance.collection(kSettingsReference);
 
   @override
   Future<String> addNewRoom({String roomID}) async {
@@ -31,12 +34,12 @@ class GameDocFirestore implements GameDoc {
 
         // try to create document with roomID
         await rooms.doc(roomID).set({
-          roomIDField: roomID, // TODO: remove
-          gameIDField: settingsSnapshot.get(gameIDField),
-          openedField: DateTime.now(),
-          playersField: [_authorization.getCurrentUserID()],
-          gameStatusField: waitingStatus,
-          settingsReference: settingsSnapshot.data(),
+          kRoomIDField: roomID, // TODO: remove
+          kGameIDField: settingsSnapshot.get(kGameIDField),
+          kOpenedField: DateTime.now(),
+          kPlayersField: [_authorization.getCurrentUserID()],
+          kGameStatusField: kWaitingStatus,
+          kSettingsReference: settingsSnapshot.data(),
         });
         return roomID;
       }
@@ -50,9 +53,49 @@ class GameDocFirestore implements GameDoc {
   Stream<Room> getDocStream({String roomID}) {
     // Stream of Document Snapshots from database
     Stream<DocumentSnapshot> docRefStream =
-        FirebaseFirestore.instance.collection(roomsCollection).doc(roomID).snapshots();
+        FirebaseFirestore.instance.collection(kRoomsCollection).doc(roomID).snapshots();
+
     // return converted string
-    return _createRoomIDStream(docRefStream);
+    return docRefStream
+        .map((docSnap) => convertSnapToRoom(docSnap)); //_createRoomIDStream(docRefStream);
+  }
+
+  Room convertSnapToRoom(DocumentSnapshot docSnap) {
+    try {
+      print('CONVERTING STREAM DATA! ${docSnap.data()['gameID']}');
+
+      // convert player list into standardized format
+      List<Player> playerList = [];
+      for (int i = 0; i < docSnap.data()[kPlayersField].length; i++) {
+        Map<String, dynamic> currentPlayerRef =
+            docSnap.data()[kSettingsReference][kPlayersField][i];
+        playerList.add(
+          Player(
+            uid: docSnap.data()[kPlayersField][i],
+            name: currentPlayerRef['name'],
+            color: HexColor.fromHex(currentPlayerRef['color']),
+            image: currentPlayerRef['image'],
+          ),
+        );
+      }
+
+      // convert all values into room class
+      Room currentRoomData = Room(
+        gameTitle: docSnap.data()[kSettingsReference]['gameTitle'],
+        roomID: docSnap.data()[kRoomIDField],
+        gameProgress: docSnap.data()[kGameStatusField],
+        players: playerList,
+        minimumPlayers: docSnap.data()[kSettingsReference]['minimumPlayers'],
+        maximumPlayers: docSnap.data()[kSettingsReference]['maximumPlayers'],
+        opened: docSnap.data()['opened'].toDate(),
+        started: docSnap.data()['started'],
+      );
+      return currentRoomData;
+    } catch (e) {
+      print('Error while trying to create room data from stream.');
+      print('Error: $e');
+      return null;
+    }
   }
 
   // convert firestore data stream to stream of standardized data
@@ -61,14 +104,16 @@ class GameDocFirestore implements GameDoc {
     await for (DocumentSnapshot docSnap in docRefStream) {
       // try to create room data from snapshot
       try {
+        print('CONVERTING STREAM DATA! ${docSnap.data()['gameID']}');
+
         // convert player list into standardized format
         List<Player> playerList = [];
-        for (int i = 0; i < docSnap.data()[playersField].length; i++) {
+        for (int i = 0; i < docSnap.data()[kPlayersField].length; i++) {
           Map<String, dynamic> currentPlayerRef =
-              docSnap.data()[settingsReference][playersField][i];
+              docSnap.data()[kSettingsReference][kPlayersField][i];
           playerList.add(
             Player(
-              uid: docSnap.data()[playersField][i],
+              uid: docSnap.data()[kPlayersField][i],
               name: currentPlayerRef['name'],
               color: HexColor.fromHex(currentPlayerRef['color']),
               image: currentPlayerRef['image'],
@@ -78,12 +123,12 @@ class GameDocFirestore implements GameDoc {
 
         // convert all values into room class
         Room currentRoomData = Room(
-          gameTitle: docSnap.data()['settings']['gameTitle'],
-          roomID: docSnap.data()[roomIDField],
-          gameProgress: docSnap.data()['gameProgress'],
+          gameTitle: docSnap.data()[kSettingsReference]['gameTitle'],
+          roomID: docSnap.data()[kRoomIDField],
+          gameProgress: docSnap.data()[kGameStatusField],
           players: playerList,
-          minimumPlayers: docSnap.data()['settings']['minimumPlayers'],
-          maximumPlayers: docSnap.data()['settings']['maximumPlayers'],
+          minimumPlayers: docSnap.data()[kSettingsReference]['minimumPlayers'],
+          maximumPlayers: docSnap.data()[kSettingsReference]['maximumPlayers'],
           opened: docSnap.data()['opened'].toDate(),
           started: docSnap.data()['started'],
         );
@@ -121,7 +166,7 @@ class GameDocFirestore implements GameDoc {
             return roomID;
           }
           // if player is not in the room
-          else if (snapshot.data()[gameStatusField] == waitingStatus) {
+          else if (snapshot.data()[kGameStatusField] == kWaitingStatus) {
             // add new player
             playersList.add(uid);
             // update player list on the document
@@ -158,7 +203,7 @@ class GameDocFirestore implements GameDoc {
         return null;
       }
       // check if game has already been started
-      else if (snapshot.data()[gameStatusField] != waitingStatus) {
+      else if (snapshot.data()[kGameStatusField] != kWaitingStatus) {
         // return false (cannot leave room)
         return false;
       }
@@ -210,7 +255,7 @@ class GameDocFirestore implements GameDoc {
         return false;
       }
       // check if game has already been started
-      else if (snapshot.data()[gameStatusField] != waitingStatus) {
+      else if (snapshot.data()[kGameStatusField] != kWaitingStatus) {
         // fail silently?
         return null;
       } else {
@@ -226,9 +271,9 @@ class GameDocFirestore implements GameDoc {
             // update room document
             transaction.update(rooms.doc(roomID), {
               // change status to first milestone
-              gameStatusField: snapshot.data()['settings'][settingsStatusField][0].keys.first,
+              kGameStatusField: snapshot.data()['settings'][kSettingsStatusField][0].keys.first,
               // save UID of host
-              hostField: _authorization.getCurrentUserID(),
+              kHostField: _authorization.getCurrentUserID(),
             });
           }
         } catch (e) {

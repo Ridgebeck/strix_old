@@ -6,11 +6,16 @@ import 'package:strix/business_logic/classes/room.dart';
 // This class handles the conversion and puts it in a form convenient
 // for displaying on a view (without knowing anything about any particular view).
 class WaitingRoomLogic {
+  WaitingRoomLogic() {
+    print('WAITING ROOM LOGIC CALLED');
+  }
+
   final GameDoc _gameDoc = serviceLocator<GameDoc>();
 
   // provide stream of game room to UI
   Stream<Room> roomDocStream(String roomID) {
     // check if returned data from stream makes sense
+    print('ROOM DOC STREAM CALLED');
     return _gameDoc.getDocStream(roomID: roomID);
   }
 
@@ -71,11 +76,9 @@ class WaitingRoomLogic {
   }
 
   // try to leave game room if back button is pushed
-  Future<void> leaveRoom({BuildContext context, String roomID, int numberPlayers}) async {
+  Future<bool> leaveRoom({BuildContext context, String roomID, int numberPlayers}) async {
     bool leaving = true;
     if (numberPlayers == 1) {
-      print('You are the last player. Leaving will close the room.');
-      // TODO: display warning pop up if last player
       leaving = await showDialog(
         context: context,
         builder: (_) => AlertDialog(
@@ -100,7 +103,7 @@ class WaitingRoomLogic {
         barrierDismissible: false,
       );
     }
-    // only try to leave if user hit okay
+    // only try to leave if not last player or user hit okay
     if (leaving == true) {
       // remove player entry from document or
       // delete document if player is last player in room
@@ -108,6 +111,7 @@ class WaitingRoomLogic {
       // don't leave if game was already started
       if (canLeave == false) {
         print('Cannot leave room. Game was already started.');
+        return false;
       }
       // leave room even if error occurred
       else {
@@ -116,8 +120,10 @@ class WaitingRoomLogic {
           print('Error while trying to leave room.');
         }
         // go back to previous page
-        Navigator.pop(context);
+        return true;
       }
+    } else {
+      return false;
     }
   }
 }
