@@ -4,5 +4,5 @@
 // a mock implementation or fake data.
 abstract class UserDoc {
   // update user sign in data
-  Future<void> updateUserSignIn({String uid});
+  Future<void> updateUserSignIn({required String uid});
 }

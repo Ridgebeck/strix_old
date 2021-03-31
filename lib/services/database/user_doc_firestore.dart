@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 // interaction with game document on Firestore
 class UserDocFirestore implements UserDoc {
   @override
-  Future<void> updateUserSignIn({String uid}) async {
+  Future<void> updateUserSignIn({required String uid}) async {
     // Create a doc ref to the user document
     final DocumentReference userRef = FirebaseFirestore.instance.collection('users').doc(uid);
     // create user UID if it does not exist

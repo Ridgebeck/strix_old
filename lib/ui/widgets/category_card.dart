@@ -3,9 +3,9 @@ import 'package:strix/config/constants.dart';
 import 'package:strix/ui/screens/picture_screen.dart';
 
 class CategoryCard extends StatelessWidget {
-  final int numberOfCards;
-  final BoxConstraints constraints;
-  final String cardText;
+  final int? numberOfCards;
+  final BoxConstraints? constraints;
+  final String? cardText;
   final double verticalMargin = 0.01;
   final double horizontalMargin = 0.04;
   CategoryCard({this.cardText, this.constraints, this.numberOfCards});
@@ -15,13 +15,13 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cardHeight =
-        (constraints.maxHeight - (numberOfCards * 2 * verticalMargin * constraints.maxHeight)) /
-            (numberOfCards);
-    final cardWidth = constraints.maxWidth - 2 * horizontalMargin;
+        (constraints!.maxHeight - (numberOfCards! * 2 * verticalMargin * constraints!.maxHeight)) /
+            numberOfCards!;
+    final cardWidth = constraints!.maxWidth - 2 * horizontalMargin;
     return Padding(
       padding: EdgeInsets.symmetric(
-          horizontal: constraints.maxWidth * horizontalMargin,
-          vertical: constraints.maxHeight * verticalMargin),
+          horizontal: constraints!.maxWidth * horizontalMargin,
+          vertical: constraints!.maxHeight * verticalMargin),
       child: Stack(children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(15.0),
@@ -46,7 +46,7 @@ class CategoryCard extends StatelessWidget {
           left: cardHeight * 0.15,
           top: cardHeight * 0.15,
           child: Text(
-            cardText,
+            cardText!,
             style: cardTextStyle,
           ),
         ),

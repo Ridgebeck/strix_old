@@ -10,8 +10,8 @@ class StartRoomLogic {
 
   // add game to database, returns database reference
   // save reference to local memory
-  Future<String> addRoom() async {
-    String confirmedRoomID;
+  Future<String?> addRoom() async {
+    String? confirmedRoomID;
 
     // try maximum 3 times
     for (int i = 0; i < 3; i++) {
@@ -26,7 +26,7 @@ class StartRoomLogic {
     // save roomID to local memory
     //await _storage.saveDatabaseReference(confirmedRoomID);
 
-    // return database reference (roomID = document ID)
+    // return roomID or null
     return confirmedRoomID;
   }
 

@@ -10,10 +10,10 @@ class PictureCard extends StatelessWidget {
   final double verticalMargin = 0.01;
   final double horizontalMargin = 0.04;
   PictureCard({
-    @required this.constraints,
-    @required this.imageString,
-    @required this.cardTitle,
-    @required this.cardDescription,
+    required this.constraints,
+    required this.imageString,
+    required this.cardTitle,
+    required this.cardDescription,
   });
 
   static const cardTextStyle = TextStyle(color: kTextColorDark);

@@ -7,9 +7,16 @@ class Player {
   IconData iconData;
 
   Player({
-    @required this.name,
-    this.uid,
-    this.color,
-    this.iconData,
+    required this.name,
+    required this.uid,
+    required this.color,
+    required this.iconData,
   });
 }
+
+Player noPlayer = Player(
+  name: 'no player found!',
+  uid: 'no uid',
+  color: Colors.white,
+  iconData: Icons.add,
+);

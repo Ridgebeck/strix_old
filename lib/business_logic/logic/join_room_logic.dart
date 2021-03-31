@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:strix/services/database/game_doc_abstract.dart';
 import 'package:strix/services/service_locator.dart';
-import 'package:strix/config/constants.dart';
+import 'package:strix/ui/screens/waiting_room_screen.dart';
 
 // This class handles the conversion and puts it in a form convenient
 // for displaying on a view (without knowing anything about any particular view).
@@ -11,8 +11,12 @@ class JoinRoomLogic {
 
   // add game to database, returns database reference
   // save reference to local memory
-  Future<void> joinRoom({BuildContext context, String roomID}) async {
-    String docID = await _gameDoc.joinRoom(roomID: roomID);
+  Future<void> joinRoom({
+    required BuildContext context,
+    required String roomID,
+    required AnimationController animationController,
+  }) async {
+    String? docID = await _gameDoc.joinRoom(roomID: roomID);
     // display error or join room
     if (docID == 'full') {
       await showDialog(
@@ -49,9 +53,9 @@ class JoinRoomLogic {
         barrierDismissible: false,
       );
     } else {
+      animationController.animateTo(0.0);
       // navigate to waiting room
-      // todo: change status variable instead
-      //Navigator.of(context).pushNamed(WaitingRoomScreen.route_id, arguments: docID);
+      Navigator.of(context).pushReplacementNamed(WaitingRoomScreen.route_id, arguments: docID);
     }
   }
 }

@@ -1,36 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:strix/ui/widgets/category_card.dart';
+import 'package:strix/ui/widgets/screen_header.dart';
 
 class ToolsScreen extends StatelessWidget {
   final int numberOfCards = 4;
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-      return Column(
-        children: [
-          CategoryCard(
-            cardText: 'browser',
-            constraints: constraints,
-            numberOfCards: numberOfCards,
+    return Column(
+      children: [
+        Expanded(
+          flex: 11,
+          child: ScreenHeader(
+            title: 'tools',
+            iconData: Icons.handyman_outlined,
           ),
-          CategoryCard(
-            cardText: 'map',
-            constraints: constraints,
-            numberOfCards: numberOfCards,
-          ),
-          CategoryCard(
-            cardText: 'enhancer',
-            constraints: constraints,
-            numberOfCards: numberOfCards,
-          ),
-          CategoryCard(
-            cardText: 'others',
-            constraints: constraints,
-            numberOfCards: numberOfCards,
-          ),
-        ],
-      );
-    });
+        ),
+        Expanded(
+          flex: 89,
+          child: Container(
+              //color: Colors.green,
+              ),
+        ),
+      ],
+    );
   }
 }

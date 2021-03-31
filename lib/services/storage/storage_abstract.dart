@@ -4,5 +4,5 @@
 // a mock implementation or fake data.
 abstract class Storage {
   // save String to local memory
-  Future<void> saveString({String key, String value});
+  Future<void> saveString({String? key, String? value});
 }

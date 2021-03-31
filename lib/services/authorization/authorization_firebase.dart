@@ -9,25 +9,21 @@ class AuthorizationFirebase implements Authorization {
 
   @override
   Future<void> signInUserAnonymous() async {
-    UserCredential userCredential;
-
     // sign in user into app
     try {
-      userCredential = await FirebaseAuth.instance.signInAnonymously();
-    } on FirebaseAuthException catch (e) {
-      // TODO: error handling
-      print('Sign in anonymously failed with error code: ${e.code}');
-      print('Credential: ${e.credential}');
-      print('Message: ${e.message}');
+      // fetch user credentials
+      UserCredential userCredential = await FirebaseAuth.instance.signInAnonymously();
+      // create or update user document
+      _userDoc.updateUserSignIn(uid: userCredential.user!.uid);
+    } catch (e) {
+      print('Sign in anonymously failed. Error code: $e');
+      // todo: inform user about not being able to sign in
     }
-
-    // save current login time in user document
-    _userDoc.updateUserSignIn(uid: userCredential.user.uid);
   }
 
   @override
   String getCurrentUserID() {
     // TODO: error handling with getting UID
-    return FirebaseAuth.instance.currentUser.uid;
+    return FirebaseAuth.instance.currentUser!.uid;
   }
 }

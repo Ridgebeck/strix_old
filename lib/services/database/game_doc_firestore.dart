@@ -1,10 +1,14 @@
 import 'dart:async';
-//import 'dart:html';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:strix/business_logic/classes/call.dart';
+import 'package:strix/business_logic/classes/chat.dart';
 import 'package:strix/business_logic/classes/hex_color.dart';
 import 'package:strix/business_logic/classes/room.dart';
 import 'package:strix/business_logic/classes/player.dart';
+import 'package:strix/business_logic/classes/person.dart';
+import 'package:strix/ui/screens/briefing_screen.dart';
 import 'game_doc_abstract.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:strix/services/service_locator.dart';
@@ -19,29 +23,38 @@ class GameDocFirestore implements GameDoc {
   final CollectionReference settings = FirebaseFirestore.instance.collection(kSettingsReference);
 
   @override
-  Future<String> addNewRoom({String roomID}) async {
+  Future<String?> addNewRoom({required String roomID}) async {
     // try to get document from rooms collection with random room ID
     return await rooms.doc(roomID).get().then((docSnapshot) async {
       // check if document with roomID already exists
       if (docSnapshot.exists) {
         print('Document already exists!');
-        return 'exists';
+        return null;
       }
       // document does not exist yet, proceed
       else {
         // try to fetch settings document
+        // TODO: replace gameData with (selectable) gameID
         DocumentSnapshot settingsSnapshot = await settings.doc('gameData').get();
-        // TODO: replace gameData with gameID
+
+        // create first player entry
+        Map<String, dynamic> firstPlayerValues = settingsSnapshot[kPlayersField][0];
+        Map<String, dynamic> playerEntry = {
+          'uid': _authorization.getCurrentUserID(),
+          'name': firstPlayerValues['name'],
+          'iconNumber': firstPlayerValues['iconNumber'],
+          'color': firstPlayerValues['color'],
+        };
 
         // try to create document with roomID
         await rooms.doc(roomID).set({
-          kRoomIDField: roomID, // TODO: remove
+          kRoomIDField: roomID,
           kGameIDField: settingsSnapshot.get(kGameIDField),
           kOpenedField: DateTime.now(),
-          kPlayersField: [_authorization.getCurrentUserID()],
+          kPlayersField: [playerEntry],
           kGameStatusField: kWaitingStatus,
           kSettingsReference: settingsSnapshot.data(),
-          kChatField: [],
+          kChatField: {'messages': []},
         });
         return roomID;
       }
@@ -52,48 +65,62 @@ class GameDocFirestore implements GameDoc {
   }
 
   @override
-  Stream<Room> getDocStream({String roomID}) {
+  Stream<Room?> getDocStream({required String roomID}) {
+    print('trying to start stream!');
     // Stream of Document Snapshots from database
     Stream<DocumentSnapshot> docRefStream =
         FirebaseFirestore.instance.collection(kRoomsCollection).doc(roomID).snapshots();
 
     // return converted string
-    return docRefStream
-        .map((docSnap) => docSnapToRoom(docSnap)); //_createRoomIDStream(docRefStream);
+    return docRefStream.map((docSnap) => docSnapToRoom(docSnap));
   }
 
-  Room docSnapToRoom(DocumentSnapshot docSnap) {
+  Room? docSnapToRoom(DocumentSnapshot docSnap) {
     try {
-      print('CONVERTING STREAM DATA! ${docSnap.data()['gameID']}');
+      Map<String, dynamic>? snapData = docSnap.data();
+      // check if snapshot has data
+      if (!docSnap.exists || snapData == null) {
+        return null;
+      } else {
+        print('CONVERTING STREAM DATA! ${snapData['gameID']}');
 
-      // convert player list into standardized format
-      List<Player> playerList = [];
-      for (int i = 0; i < docSnap.data()[kPlayersField].length; i++) {
-        Map<String, dynamic> currentPlayerRef =
-            docSnap.data()[kSettingsReference][kPlayersField][i];
+        // convert player list into standardized format
+        List<Player> playerList = [];
+        for (int i = 0; i < snapData[kPlayersField].length; i++) {
+          Map<String, dynamic> currentPlayer = snapData[kPlayersField][i];
 
-        playerList.add(
-          Player(
-            uid: docSnap.data()[kPlayersField][i],
-            name: currentPlayerRef['name'],
-            color: HexColor.fromHex(currentPlayerRef['color']),
-            iconData: IconData(currentPlayerRef['iconNumber'], fontFamily: 'MaterialIcons'),
-          ),
+          playerList.add(
+            Player(
+              uid: currentPlayer['uid'],
+              name: currentPlayer['name'],
+              color: HexColor.fromHex(currentPlayer['color']),
+              iconData: IconData(currentPlayer['iconNumber'], fontFamily: 'MaterialIcons'),
+            ),
+          );
+        }
+
+        // convert chat messages into standardized format
+        Chat chat = _convertChatData(snapData[kChatField]);
+
+        // convert available assets into standardized format
+        List<AvailableAssetEntry> availableAssets = _convertAvailableAssets(snapData);
+
+        // convert all values into room class
+        Room currentRoomData = Room(
+          gameTitle: snapData[kSettingsReference]['gameTitle'],
+          roomID: snapData[kRoomIDField],
+          gameProgress: snapData[kGameStatusField],
+          players: playerList,
+          minimumPlayers: snapData[kSettingsReference]['minimumPlayers'],
+          maximumPlayers: snapData[kSettingsReference]['maximumPlayers'],
+          opened: snapData['opened'].toDate(),
+          chat: chat,
+          started: snapData['started'],
+          availableAssets: availableAssets, //snapData[kSettingsReference][kSettingsStatusField],
+          host: snapData['host'],
         );
+        return currentRoomData;
       }
-
-      // convert all values into room class
-      Room currentRoomData = Room(
-        gameTitle: docSnap.data()[kSettingsReference]['gameTitle'],
-        roomID: docSnap.data()[kRoomIDField],
-        gameProgress: docSnap.data()[kGameStatusField],
-        players: playerList,
-        minimumPlayers: docSnap.data()[kSettingsReference]['minimumPlayers'],
-        maximumPlayers: docSnap.data()[kSettingsReference]['maximumPlayers'],
-        opened: docSnap.data()['opened'].toDate(),
-        started: docSnap.data()['started'],
-      );
-      return currentRoomData;
     } catch (e) {
       print('Error while trying to create room data from stream.');
       print('Error: $e');
@@ -101,20 +128,126 @@ class GameDocFirestore implements GameDoc {
     }
   }
 
+  List<AvailableAssetEntry> _convertAvailableAssets(Map<String, dynamic> snapData) {
+    List<AvailableAssetEntry> availableAssets = [];
+
+    List<dynamic> availableAssetsRaw = snapData[kSettingsReference][kSettingsStatusField];
+    // go through all entries in list
+    for (Map<String, dynamic> milestone in availableAssetsRaw) {
+      AvailableAssetEntry assetEntry = AvailableAssetEntry();
+
+      milestone.forEach((name, value) {
+        // save entry name
+        assetEntry.entryName = name;
+
+        // convert call if there is one
+        if (value.containsKey('call')) {
+          Map<String, dynamic> callMap = snapData[kSettingsReference]['calls'][value['call']];
+          Map<String, dynamic> callerMap =
+              snapData[kSettingsReference]['protagonists'][callMap['person']];
+          Person caller = Person(
+            firstName: callerMap['firstName'],
+            lastName: callerMap['lastName'],
+            profileImage: callerMap['profileImage'],
+            title: callerMap['title'],
+          );
+          Call currentCall = Call(
+            callFile: callMap['callFile'],
+            person: caller,
+          );
+          assetEntry.call = currentCall;
+        }
+
+        // convert picture list if there is one
+        if (value.containsKey('pictures')) {
+          assetEntry.pictures = List.from(value['pictures']);
+        }
+
+        // convert audio file list if there is one
+        if (value.containsKey('audioFiles')) {
+          assetEntry.audioFiles = List.from(value['audioFiles']);
+        }
+
+        // convert archived calls if there are any
+        if (value.containsKey('archivedCalls')) {
+          print('archived calls found!');
+          //assetEntry.pictures = List.from(value['pictures']);
+          // todo: convert to List<Call>
+        }
+      });
+      availableAssets.add(assetEntry);
+    }
+    return availableAssets;
+  }
+
+  Chat _convertChatData(Map<String, dynamic> chatData) {
+    List<Message> chatList = [];
+    print('CONVERTING CHAT');
+
+    print('messages: ${chatData[kChatMessagesField].length}');
+
+    for (int i = 0; i < chatData[kChatMessagesField].length; i++) {
+      try {
+        Map<String, dynamic> currentMessage = chatData[kChatMessagesField][i];
+        Map<String, dynamic> currentAuthor = currentMessage['author'];
+
+        Person? currentPerson;
+        Player? currentPlayer;
+
+        // check if author is player or person
+        if (currentAuthor['uid'] != null) {
+          currentPlayer = Player(
+            name: currentAuthor['name'],
+            uid: currentAuthor['uid'],
+            color: HexColor.fromHex(currentAuthor['color']),
+            iconData: IconData(currentAuthor['iconNumber'], fontFamily: 'MaterialIcons'),
+          );
+        } else {
+          currentPerson = Person(
+            firstName: 'Russ',
+            //currentAuthor['firstName'],
+            lastName: 'Hanneman',
+            //currentAuthor['lastName'],
+            title: 'Field Agent',
+            //currentAuthor['title'],
+            profileImage: 'test.jpg',
+            //currentAuthor['profileImage'],
+            color: Colors.red, //HexColor.fromHex(currentAuthor['color']),
+          );
+        }
+
+        chatList.add(
+          Message(
+            text: currentMessage['text'],
+            author: currentPlayer != null ? currentPlayer : currentPerson,
+            time: currentMessage['time'].toDate(),
+          ),
+        );
+      } catch (e) {
+        print('Could not convert message. Error: $e');
+      }
+    }
+    return Chat(messages: chatList);
+  }
+
   @override
-  Future<String> joinRoom({String roomID}) async {
+  Future<String?> joinRoom({required String roomID}) async {
     // change document safely in a transaction
     return await FirebaseFirestore.instance.runTransaction((transaction) async {
       // Get the document
       DocumentSnapshot snapshot = await transaction.get(rooms.doc(roomID));
-      // check if document exists
-      if (!snapshot.exists) {
+      Map<String, dynamic>? snapData = snapshot.data();
+      // check if document exists and data is not null
+      if (snapData == null || !snapshot.exists) {
         return null;
       } else {
         // check if player count is below limit
-        List<String> playersList = List.from(snapshot.data()['players']);
+        List<Map<String, dynamic>> playersList = List.from(snapData['players']);
 
-        if (playersList.length >= snapshot.data()['settings']['maximumPlayers']) {
+        print('PLAYER LIST: $playersList');
+        print('UID: ${_authorization.getCurrentUserID()}');
+
+        if (playersList.length >= snapData['settings']['maximumPlayers']) {
           // return error String
           return 'full';
         } else {
@@ -122,14 +255,28 @@ class GameDocFirestore implements GameDoc {
           String uid = _authorization.getCurrentUserID();
 
           // check if player (uid) is already in the room
-          if (playersList.contains(uid)) {
-            print('Player already in room. Joining.');
-            return roomID;
+          for (Map<String, dynamic> playerEntry in playersList) {
+            if (playerEntry['uid'] == uid) {
+              print('Player already in room. Joining.');
+              return roomID;
+            }
           }
-          // if player is not in the room
-          else if (snapshot.data()[kGameStatusField] == kWaitingStatus) {
-            // add new player
-            playersList.add(uid);
+
+          // if player is not in the room and status is waiting
+          if (snapData[kGameStatusField] == kWaitingStatus) {
+            // find corresponding player data
+            Map<String, dynamic> playerData =
+                snapData[kSettingsReference][kPlayersField][playersList.length];
+
+            // add new player with uid and copied player data
+            Map<String, dynamic> playerEntry = {
+              'uid': uid,
+              'name': playerData['name'],
+              'iconNumber': playerData['iconNumber'],
+              'color': playerData['color'],
+            };
+            playersList.add(playerEntry);
+
             // update player list on the document
             transaction.update(rooms.doc(roomID), {
               'players': playersList,
@@ -141,106 +288,152 @@ class GameDocFirestore implements GameDoc {
         }
       }
     }).then((value) {
-      // return docID if everything works out
+      // return roomID if everything works out
       return value;
       // otherwise return null
-    }).catchError((error) {
-      print('Error while trying to join a room.');
-      print(error);
+    }).catchError((e) {
+      print('Error while trying to join a room: $e');
       return null;
     });
   }
 
   @override
-  Future<bool> leaveRoom({String roomID}) async {
+  leaveRoom({
+    required String roomID,
+    required BuildContext context,
+    required AnimationController animationController,
+  }) async {
     // change document safely in a transaction
-    return await FirebaseFirestore.instance.runTransaction((transaction) async {
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
       // Get the document
       DocumentSnapshot snapshot = await transaction.get(rooms.doc(roomID));
+      Map<String, dynamic>? snapData = snapshot.data();
 
       // check if document exists
-      if (!snapshot.exists) {
-        print("Error: game does not exist!");
-        return null;
+      if (!snapshot.exists || snapData == null) {
+        print("Error: game does not exist or has no data!");
+        // todo: error handling?
       }
       // check if game has already been started
-      else if (snapshot.data()[kGameStatusField] != kWaitingStatus) {
-        // return false (cannot leave room)
-        return false;
+      else if (snapData[kGameStatusField] != kWaitingStatus) {
+        print("Game has been started already!");
       }
       // otherwise leave the room
       else {
         // get current user ID
         String uid = _authorization.getCurrentUserID();
-        // get player list
-        List<String> playersList = List.from(snapshot.data()['players']);
+        // get list of players
+        List<Map<String, dynamic>> playersList = List.from(snapData['players']);
+
         // check if last participant is leaving
-        print('length ${playersList.length}');
         if (playersList.length == 1) {
           print('last player leaving');
-          // try to delete complete document
+          // leave page
+          animationController.animateTo(0.0);
+          Navigator.of(context).pushReplacementNamed(BriefingScreen.route_id);
+
+          // delete complete document after page has been left
+          await Future.delayed(Duration(seconds: 3));
+          // todo: delete after leaving room
           transaction.delete(rooms.doc(roomID));
-          // TODO: error handling if delete does not work?
         } else {
           print('participant leaving');
-          // try to remove player from list
-          playersList.remove(uid);
+          // remove player from list
+          playersList.removeWhere((playerEntry) => playerEntry['uid'] == uid);
           // TODO: error handling if uid is not found?
-          // perform an update on the document
+
+          // update other player data in case the order changed
+          List<Map<String, dynamic>> playerDataList =
+              List.from(snapData[kSettingsReference][kPlayersField]);
+
+          for (int i = 0; i < playersList.length; i++) {
+            playersList[i] = {
+              'uid': playersList[i]['uid'],
+              'name': playerDataList[i]['name'],
+              'iconNumber': playerDataList[i]['iconNumber'],
+              'color': playerDataList[i]['color'],
+            };
+          }
+          // leave page
+          animationController.animateTo(0.0);
+          Navigator.of(context).pushReplacementNamed(BriefingScreen.route_id);
+
+          // perform an update on the document after page has been left
+          await Future.delayed(Duration(seconds: 2));
           transaction.update(rooms.doc(roomID), {
             'players': playersList,
           });
         }
-        return true;
       }
-    }).then((value) {
-      // return value if everything works out
-      return value;
-      // otherwise return null
-    }).catchError((error) {
-      print('Error while trying to leave game.');
-      print(error);
-      return null;
     });
   }
 
   @override
-  Future<void> startGame({String roomID}) async {
+  Future<bool> startGame({required String roomID}) async {
     // change document safely in a transaction
-    await FirebaseFirestore.instance.runTransaction((transaction) async {
+    //todo: return value to logic?
+    return await FirebaseFirestore.instance.runTransaction((transaction) async {
       // Get the document
       DocumentSnapshot snapshot = await transaction.get(rooms.doc(roomID));
-      // check if document exists
-      if (!snapshot.exists) {
+      Map<String, dynamic>? snapData = snapshot.data();
+
+      // check if document exists and data is not null
+      if (!snapshot.exists || snapData == null) {
         print("Error: game does not exist!");
         return false;
       }
       // check if game has already been started
-      else if (snapshot.data()[kGameStatusField] != kWaitingStatus) {
-        // fail silently?
-        return null;
+      else if (snapData[kGameStatusField] != kWaitingStatus) {
+        // todo: return specific value?
+        return true;
       } else {
-        // check if enough players are in room
-        int numberPlayers;
-        int minimumPlayers;
+        // check if enough players are in the room
         try {
-          numberPlayers = snapshot.data()['players'].length;
-          minimumPlayers = snapshot.data()['settings']['minimumPlayers'];
+          int numberPlayers = snapData['players'].length;
+          int minimumPlayers = snapData['settings']['minimumPlayers'];
 
           // start game if enough players are present
           if (numberPlayers >= minimumPlayers) {
             // update room document
             transaction.update(rooms.doc(roomID), {
-              // change status to first milestone
-              kGameStatusField: snapshot.data()['settings'][kSettingsStatusField][0].keys.first,
               // save UID of host
               kHostField: _authorization.getCurrentUserID(),
+              // change status to first milestone
+              kGameStatusField: snapData['settings'][kSettingsStatusField][0].keys.first,
             });
           }
+          return true;
         } catch (e) {
           print('No players found. Error: $e');
+          return false;
         }
       }
     });
+  }
+
+  @override
+  void addMessage({required Message message, required String roomID}) {
+    Color authorColor = message.author.color;
+    List<dynamic> messageList = [
+      {
+        'text': message.text,
+        'author': {
+          'name': message.author.name,
+          'uid': message.author.uid,
+          'color': authorColor.toHex(),
+          'iconNumber': message.author.iconData.codePoint,
+        },
+        'time': DateTime.now(),
+      },
+    ];
+
+    // todo: have to use set with merge:true due to update not working
+    rooms
+        .doc(roomID)
+        .set({
+          'chat': {'messages': FieldValue.arrayUnion(messageList)},
+        }, SetOptions(merge: true))
+        .then((value) => print('Updated'))
+        .catchError((e) => print('Error while sending message: $e'));
   }
 }
