@@ -11,7 +11,8 @@ import 'package:strix/ui/widgets/screen_header.dart';
 
 class ChatScreen extends StatelessWidget {
   final Room roomData;
-  ChatScreen({required this.roomData});
+  final bool newMessage;
+  ChatScreen({required this.roomData, required this.newMessage});
 
   final _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -32,19 +33,40 @@ class ChatScreen extends StatelessWidget {
           ),
           Expanded(
             flex: 88,
-            child: ListView.builder(
-              itemCount: chatData.messages.length,
-              reverse: true,
-              shrinkWrap: true,
-              controller: _scrollController,
-              physics: BouncingScrollPhysics(),
-              itemBuilder: (context, index) {
-                List<Message> reversedList = chatData.messages.reversed.toList();
-                Message message = reversedList[index];
-                bool fromMe = message.author.uid == _authorization.getCurrentUserID();
+            child: Column(
+              children: [
+                Expanded(
+                  flex: 95,
+                  child: ListView.builder(
+                    itemCount: chatData.messages.length,
+                    reverse: true,
+                    shrinkWrap: true,
+                    controller: _scrollController,
+                    physics: BouncingScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      List<Message> reversedList = chatData.messages.reversed.toList();
+                      Message message = reversedList[index];
+                      bool fromMe = _authorization.getCurrentUserID() == message.author.uid;
+                      bool fromTeam = !message.author.uid.startsWith('doNotBreak');
+                      bool delay =
+                          (index == 0 && fromTeam == false && reversedList.length > 1 && newMessage)
+                              ? true
+                              : false;
 
-                return ChatMessage(fromMe: fromMe, message: message);
-              },
+                      return ChatMessage(
+                        fromTeam: fromTeam,
+                        fromMe: fromMe,
+                        message: message,
+                        delay: delay,
+                      );
+                    },
+                  ),
+                ),
+                Expanded(
+                  flex: 5,
+                  child: Container(),
+                ),
+              ],
             ),
           ),
           SizedBox(
@@ -68,6 +90,7 @@ class ChatScreen extends StatelessWidget {
                         textAlignVertical: TextAlignVertical.center,
                         expands: true,
                         maxLines: null,
+                        maxLength: roomData.maximumInputCharacters,
                         decoration: InputDecoration(
                           hintText: 'Your message here.',
                           contentPadding: EdgeInsets.symmetric(horizontal: 20.0),

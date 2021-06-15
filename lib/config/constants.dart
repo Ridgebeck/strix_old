@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 const String kRoomsCollection = 'activeRooms';
 const String kSettingsReference = 'settings'; // used for collection name and field name
+const String kBriefingReference = 'briefing';
 const String kRoomIDField = 'roomID';
 const String kGameIDField = 'gameID';
 const String kHostField = 'host';
@@ -24,7 +25,8 @@ const selectedGameID = 1;
 const Color kBackgroundColor = Color.fromRGBO(230, 230, 235, 1.0);
 const Color kBackgroundColorLight = Color.fromRGBO(238, 238, 245, 1.0);
 const Color kCardColorLight = Color.fromRGBO(255, 255, 255, 1.0);
-const Color kAccentColor = Color.fromRGBO(252, 3, 173, 1.0);
+//const Color kAccentColor = Color.fromRGBO(252, 3, 173, 1.0);
+const Color kAccentColor = Colors.greenAccent;
 const Color kSplashColor = Color.fromRGBO(252, 3, 173, 1.0);
 const Color kTextColorDark = Color.fromRGBO(60, 60, 60, 1.0);
 const TextStyle kTextStyle = TextStyle(fontSize: 15, color: Colors.white);

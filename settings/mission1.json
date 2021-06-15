@@ -1,0 +1,114 @@
+{
+    "availableAssets": [
+        {
+            "firstCall": {
+                "call": "introCall"
+            }
+        },
+        {
+            "firstRiddle": {
+                "data": {
+                    "messages": [
+                        {
+                            "instagram": false,
+                            "name": "chat_1.png"
+                        },
+                        {
+                            "instagram": false,
+                            "name": "chat_2.png"
+                        },
+                        {
+                            "instagram": false,
+                            "name": "chat_3.png"
+                        },
+                        {
+                            "instagram": true,
+                            "name": "chat_4.png"
+                        },
+                        {
+                            "instagram": true,
+                            "name": "chat_5.png"
+                        },
+                        {
+                            "instagram": true,
+                            "name": "chat_6.png"
+                        }
+                    ],
+                    "pictures": [
+                        "apartment_1.jpeg",
+                        "apartment_2.jpeg"
+                    ]
+                },
+                "mission": {
+                    "archivedCalls": [
+                        "introCall"
+                    ],
+                    "briefing": "A young man named Derek went missing.\\n\\nThe local police department was not able to locate him or his last activities. Friends of Derek insist that something must have happened to him and asked STRIX for help. It\u2019s been 3 days since the last time they could trace any activity from him and now we need your help. Time is running out\u2026 \\n\\nYou need to use your intelligence and analytical skills and help us solve this case. You will be teaming up with one of our best field agents John Mason who will be supporting you. Your goal is to understand what happened and reconstruct how and when he went missing and try to find Derek alive."
+                }
+            }
+        },
+        {
+            "secondCall": {
+                "call": "firstRiddleSolved"
+            }
+        }
+    ],
+    "botAPIAddress": "http://34.69.81.214:8000/webhooks/rest/webhook",
+    "calls": {
+        "firstRiddleSolved": {
+            "callFile": "ipadSolved.mp4",
+            "person": "fieldAgent1"
+        },
+        "introCall": {
+            "callFile": "sample_call_1.mp4",
+            "person": "director"
+        }
+    },
+    "gameID": 1,
+    "gameTitle": "Green Light",
+    "hasInstagram": false,
+    "maximumInputCharacters": 200,
+    "maximumPlayers": 4,
+    "minimumPlayers": 1,
+    "players": [
+        {
+            "color": "#0000FF",
+            "iconNumber": 59565,
+            "name": "Noctis"
+        },
+        {
+            "color": "#FF0000",
+            "iconNumber": 59565,
+            "name": "Volantes"
+        },
+        {
+            "color": "#00ff00",
+            "iconNumber": 59565,
+            "name": "Ninox"
+        },
+        {
+            "color": "#ff00d0",
+            "iconNumber": 59565,
+            "name": "Silva"
+        }
+    ],
+    "protagonists": {
+        "director": {
+            "firstName": "Susan",
+            "lastName": "Cooper",
+            "profileImage": "director.jpeg",
+            "title": "Director",
+            "uid": "doNotBreakDirectorBot"
+        },
+        "fieldAgent1": {
+            "color": "#42e0f5",
+            "firstName": "John",
+            "iconNumber": 66666,
+            "isBot": true,
+            "lastName": "Mason",
+            "profileImage": "russ.jpeg",
+            "title": "Field Agent",
+            "uid": "doNotBreakAgentBot"
+        }
+    }
+}

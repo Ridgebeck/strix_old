@@ -18,10 +18,10 @@ class _VideoBackgroundState extends State<VideoBackground> {
     super.initState();
     _controller = VideoPlayerController.asset('assets/videos/background_video.mp4')
       ..initialize().then((_) {
-        // Once the video has been loaded we play the video and set looping to true.
+        // once the video has been loaded we play the video and set looping to true.
         _controller.play();
         _controller.setLooping(true);
-        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+        // ensure the first frame is shown after the video is initialized
         setState(() {});
       });
     WidgetsBinding.instance!.addPostFrameCallback((_) {

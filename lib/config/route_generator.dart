@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:strix/business_logic/classes/room.dart';
 import 'package:strix/ui/screens/briefing_screen.dart';
+import 'package:strix/ui/screens/call_screen.dart';
 import 'package:strix/ui/screens/icoming_call_screen.dart';
 import 'package:strix/ui/screens/join_room_screen.dart';
 import 'package:strix/ui/screens/landing_screen.dart';
 import 'package:strix/ui/screens/picture_screen.dart';
-import 'package:strix/ui/screens/standby_screen.dart';
 import 'package:strix/ui/screens/start_join_screen.dart';
 import 'package:strix/ui/screens/video_background.dart';
 import 'package:strix/ui/screens/waiting_room_screen.dart';
@@ -77,34 +78,38 @@ class RouteGenerator {
               ));
             },
           );
-
-          //MaterialPageRoute(builder: (_) => MainGameScreen(docID: args));
         }
-        return // _errorRoute();
-            // TODO: remove
-            PageRouteBuilder(
-          opaque: false,
-          pageBuilder: (context, _, __) {
-            return (MainGameScreen(
-              roomID: 'XOJKVE',
-            ));
-          },
-        );
+        return _errorRoute();
 
       case PictureScreen.route_id:
-        return MaterialPageRoute(
-          builder: (_) => PictureScreen(),
-        );
-
-      case StandbyScreen.route_id:
-        return MaterialPageRoute(
-          builder: (_) => StandbyScreen(),
-        );
+        if (arguments is String) {
+          return MaterialPageRoute(
+            builder: (_) => PictureScreen(
+              pictureString: arguments,
+            ),
+          );
+        }
+        return _errorRoute();
 
       case IncomingCallScreen.route_id:
-        return MaterialPageRoute(
-          builder: (_) => IncomingCallScreen(),
-        );
+        if (arguments is Room) {
+          return MaterialPageRoute(
+            builder: (_) => IncomingCallScreen(
+              room: arguments,
+            ),
+          );
+        }
+        return _errorRoute();
+
+      case CallScreen.route_id:
+        if (arguments is Room) {
+          return MaterialPageRoute(
+            builder: (_) => CallScreen(
+              room: arguments,
+            ),
+          );
+        }
+        return _errorRoute();
 
       default:
         return _errorRoute();

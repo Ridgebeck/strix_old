@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:strix/business_logic/classes/room.dart';
 import 'package:strix/business_logic/classes/chat.dart';
 import 'package:strix/business_logic/classes/player.dart';
@@ -19,6 +18,8 @@ class ChatRoomLogic {
     // create message object
     Message message = Message(
       text: text,
+      profileImage: null,
+      image: null,
       author: player,
       time: DateTime.now(),
     );

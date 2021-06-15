@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:strix/ui/widgets/category_card.dart';
 import 'package:strix/ui/widgets/screen_header.dart';
 
 class ToolsScreen extends StatelessWidget {

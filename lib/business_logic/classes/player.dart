@@ -5,12 +5,14 @@ class Player {
   String uid;
   Color color;
   IconData iconData;
+  String? profileImage;
 
   Player({
     required this.name,
     required this.uid,
     required this.color,
     required this.iconData,
+    required this.profileImage,
   });
 }
 
@@ -19,4 +21,5 @@ Player noPlayer = Player(
   uid: 'no uid',
   color: Colors.white,
   iconData: Icons.add,
+  profileImage: null,
 );

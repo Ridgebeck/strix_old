@@ -13,8 +13,8 @@ class StartRoomLogic {
   Future<String?> addRoom() async {
     String? confirmedRoomID;
 
-    // try maximum 3 times
-    for (int i = 0; i < 3; i++) {
+    // try maximum 5 times
+    for (int i = 0; i < 5; i++) {
       // create new game with roomID
       confirmedRoomID = await _gameDoc.addNewRoom(roomID: _getRandomString(6));
       // exit for loop if docID is not null

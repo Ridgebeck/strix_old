@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:strix/business_logic/classes/chat.dart';
 import 'package:strix/business_logic/classes/player.dart';
 import 'package:strix/business_logic/classes/room.dart';
 import 'package:strix/business_logic/logic/waiting_room_logic.dart';
@@ -9,7 +8,7 @@ import 'package:strix/config/constants.dart';
 import 'package:strix/ui/widgets/bordered_button.dart';
 import 'package:strix/ui/widgets/top_icon.dart';
 
-import 'briefing_screen.dart';
+//import 'briefing_screen.dart';
 import 'main_game_screen.dart';
 
 class WaitingRoomScreen extends StatefulWidget {
