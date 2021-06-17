@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:simple_animations/simple_animations.dart';
 import 'package:strix/business_logic/classes/call.dart';
@@ -78,34 +77,31 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
               Expanded(flex: 3, child: Container()),
               Expanded(
                 flex: 20,
-                child: Neumorphic(
-                  style: NeumorphicStyle(
-                    depth: 4.0,
-                    intensity: 0.9,
-                    boxShape: NeumorphicBoxShape.circle(),
-                  ),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return MirrorAnimation<double>(
-                          tween: Tween<double>(
-                            begin: constraints.maxHeight,
-                            end: 0.96 * constraints.maxHeight,
-                          ),
-                          duration: Duration(milliseconds: 500),
-                          builder: (context, child, animatedSize) {
-                            return Container(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return MirrorAnimation<double>(
+                        tween: Tween<double>(
+                          begin: constraints.maxHeight,
+                          end: 0.96 * constraints.maxHeight,
+                        ),
+                        duration: Duration(milliseconds: 500),
+                        builder: (context, child, animatedSize) {
+                          return Center(
+                            child: Container(
+                              height: animatedSize,
                               width: animatedSize,
                               decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(500.0),
                                 image: DecorationImage(
                                   image: AssetImage(
                                       'assets/profile_pictures/${call.person.profileImage}'),
                                   fit: BoxFit.cover,
                                 ),
                               ),
-                            );
-                          });
-                    },
-                  ),
+                            ),
+                          );
+                        });
+                  },
                 ),
               ),
               Expanded(flex: 3, child: Container()),
@@ -184,31 +180,31 @@ class CallButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NeumorphicButton(
-      style: NeumorphicStyle(
-        color: kBackgroundColorLight,
-        depth: 3.0,
-        intensity: 0.9,
-        boxShape: NeumorphicBoxShape.circle(),
-      ),
+    return TextButton(
       onPressed: () => onTapFunction(),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return Container(
-            height: constraints.maxHeight,
-            width: constraints.maxHeight,
-            child: FractionallySizedBox(
-              heightFactor: 0.65,
-              child: FittedBox(
-                child: Icon(
-                  iconData,
-                  size: 50.0,
-                  color: iconColor,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.grey,
+          borderRadius: BorderRadius.circular(100.0),
+        ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Container(
+              height: constraints.maxHeight,
+              width: constraints.maxHeight,
+              child: FractionallySizedBox(
+                heightFactor: 0.65,
+                child: FittedBox(
+                  child: Icon(
+                    iconData,
+                    size: 50.0,
+                    color: iconColor,
+                  ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

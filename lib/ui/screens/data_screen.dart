@@ -1,10 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:strix/business_logic/classes/room.dart';
 import 'package:strix/config/constants.dart';
 import 'package:strix/ui/screens/picture_screen.dart';
-import 'package:strix/ui/widgets/screen_header.dart';
 
 class DataScreen extends StatefulWidget {
   final AvailableAssetEntry assets;
@@ -28,13 +26,13 @@ class _DataScreenState extends State<DataScreen> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Expanded(
-          flex: 11,
-          child: ScreenHeader(
-            title: 'data',
-            iconData: Icons.cloud_outlined,
-          ),
-        ),
+        // Expanded(
+        //   flex: 11,
+        //   child: ScreenHeader(
+        //     title: 'data',
+        //     iconData: Icons.cloud_outlined,
+        //   ),
+        // ),
         Expanded(
           flex: 89,
           child: Row(
@@ -162,19 +160,13 @@ class DataSelectionScreen extends StatelessWidget {
                         arguments: folder + '/' + data[index],
                       );
                     },
-                    child: Neumorphic(
-                      style: (NeumorphicStyle(
-                        depth: 3.0,
-                        intensity: 1.0,
-                        color: kBackgroundColorLight,
-                      )),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            fit: BoxFit.cover,
-                            image: AssetImage(
-                              'assets/data/' + folder + '/' + data[index],
-                            ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10.0),
+                        image: DecorationImage(
+                          fit: BoxFit.cover,
+                          image: AssetImage(
+                            'assets/data/' + folder + '/' + data[index],
                           ),
                         ),
                       ),
@@ -290,79 +282,79 @@ class MenuTile extends StatelessWidget {
       child: FractionallySizedBox(
         widthFactor: 0.85,
         heightFactor: 0.8,
-        child: NeumorphicButton(
-          style: NeumorphicStyle(
-            color: kBackgroundColorLight,
-            depth: 5.0,
-            intensity: 0.8,
-          ),
+        child: TextButton(
           onPressed: () {
             changeSelection(selectedDataType);
           },
-          provideHapticFeedback: true,
-          child: Column(
-            children: [
-              Expanded(child: Container()),
-              Expanded(
-                flex: 3,
-                child: Row(
-                  children: [
-                    Expanded(child: Container()),
-                    AspectRatio(
-                      aspectRatio: 1.0,
-                      child: Neumorphic(
-                        style: NeumorphicStyle(
-                          color: kBackgroundColorLight,
-                          depth: -2.0,
-                          intensity: 1.0,
-                        ),
-                        child: FractionallySizedBox(
-                          heightFactor: 0.7,
-                          widthFactor: 0.7,
-                          child: FittedBox(
-                            child: Icon(
-                              iconData,
-                              size: 150.0,
-                              color: Colors.blueGrey[300],
+          //provideHapticFeedback: true,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.grey,
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            child: Column(
+              children: [
+                Expanded(child: Container()),
+                Expanded(
+                  flex: 3,
+                  child: Row(
+                    children: [
+                      Expanded(child: Container()),
+                      AspectRatio(
+                        aspectRatio: 1.0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          child: FractionallySizedBox(
+                            heightFactor: 0.7,
+                            widthFactor: 0.7,
+                            child: FittedBox(
+                              child: Icon(
+                                iconData,
+                                size: 150.0,
+                                color: Colors.blueGrey[300],
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    Expanded(child: Container()),
-                    Expanded(
-                      flex: 10,
-                      child: Container(
-                        child: Column(
-                          children: [
-                            Expanded(child: Container()),
-                            Expanded(
-                              flex: 3,
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: FittedBox(
-                                  child: Text(
-                                    selectedDataType,
-                                    style: TextStyle(
-                                      fontSize: 50.0,
-                                      color: Colors.blueGrey[600],
-                                      fontWeight: FontWeight.bold,
+                      Expanded(child: Container()),
+                      Expanded(
+                        flex: 10,
+                        child: Container(
+                          child: Column(
+                            children: [
+                              Expanded(child: Container()),
+                              Expanded(
+                                flex: 3,
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: FittedBox(
+                                    child: Text(
+                                      selectedDataType,
+                                      style: TextStyle(
+                                        fontSize: 50.0,
+                                        color: Colors.blueGrey[600],
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                            Expanded(child: Container()),
-                          ],
+                              Expanded(child: Container()),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    Expanded(child: Container()),
-                  ],
+                      Expanded(child: Container()),
+                    ],
+                  ),
                 ),
-              ),
-              Expanded(child: Container()),
-            ],
+                Expanded(child: Container()),
+              ],
+            ),
           ),
         ),
       ),

@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:strix/business_logic/classes/chat.dart';
 import 'package:strix/business_logic/classes/player.dart';
 import 'package:strix/business_logic/classes/room.dart';
 import 'package:strix/business_logic/logic/chat_room_logic.dart';
-import 'package:strix/config/constants.dart';
 import 'package:strix/services/service_locator.dart';
 import 'package:strix/services/authorization/authorization_abstract.dart';
 import 'package:strix/ui/widgets/chat_message.dart';
-import 'package:strix/ui/widgets/screen_header.dart';
 
 class ChatScreen extends StatelessWidget {
   final Room roomData;
@@ -25,13 +22,13 @@ class ChatScreen extends StatelessWidget {
     return SafeArea(
       child: Column(
         children: [
-          Expanded(
-            flex: 12,
-            child: ScreenHeader(
-              title: 'chat',
-              iconData: Icons.chat_bubble_outline,
-            ),
-          ),
+          // Expanded(
+          //   flex: 12,
+          //   child: ScreenHeader(
+          //     title: 'chat',
+          //     iconData: Icons.chat_bubble_outline,
+          //   ),
+          // ),
           Expanded(
             flex: 88,
             child: Column(
@@ -81,12 +78,10 @@ class ChatScreen extends StatelessWidget {
                   Expanded(flex: 3, child: Container()),
                   Expanded(
                     flex: 40,
-                    child: Neumorphic(
-                      style: NeumorphicStyle(
-                        color: kBackgroundColorLight,
-                        intensity: 0.9,
-                        depth: -2.0,
-                        boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(100.0)),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(100.0),
                       ),
                       child: TextField(
                         controller: _textController,

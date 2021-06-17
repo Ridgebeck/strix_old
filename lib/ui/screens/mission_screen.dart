@@ -4,7 +4,6 @@ import 'package:strix/business_logic/classes/person.dart';
 import 'package:strix/business_logic/classes/room.dart';
 import 'package:strix/config/constants.dart';
 import 'package:strix/ui/screens/profile_screen.dart';
-import 'package:strix/ui/widgets/screen_header.dart';
 import 'package:expandable/expandable.dart';
 
 class MissionScreen extends StatelessWidget {
@@ -15,13 +14,13 @@ class MissionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Expanded(
-          flex: 11,
-          child: ScreenHeader(
-            title: 'mission',
-            iconData: Icons.folder_open,
-          ),
-        ),
+        // Expanded(
+        //   flex: 11,
+        //   child: ScreenHeader(
+        //     title: 'mission',
+        //     iconData: Icons.folder_open,
+        //   ),
+        // ),
         Expanded(
           flex: 89,
           child: missionData == null
