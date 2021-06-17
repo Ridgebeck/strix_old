@@ -1,3 +1,5 @@
+import 'package:strix/business_logic/classes/person.dart';
+
 import 'call.dart';
 import 'chat.dart';
 import 'player.dart';
@@ -49,16 +51,18 @@ class AvailableAssetEntry {
 }
 
 class DataEntry {
+  List<String>? social;
   List<String>? messages;
-  List<String>? pictures;
+  List<String>? images;
   List<String>? audioFiles;
   List<String>? videos;
   List<String>? reports;
 
   int length() {
     int length = 0;
+    this.social != null ? length += 1 : length = length;
     this.messages != null ? length += 1 : length = length;
-    this.pictures != null ? length += 1 : length = length;
+    this.images != null ? length += 1 : length = length;
     this.audioFiles != null ? length += 1 : length = length;
     this.videos != null ? length += 1 : length = length;
     this.reports != null ? length += 1 : length = length;
@@ -70,8 +74,9 @@ class DataEntry {
   }
 
   DataEntry({
+    this.social,
     this.messages,
-    this.pictures,
+    this.images,
     this.audioFiles,
     this.videos,
     this.reports,
@@ -81,7 +86,7 @@ class DataEntry {
 class MissionEntry {
   String? missionObjective;
   List<String>? objectiveEntries;
-  List<String>? profileEntries;
+  List<Person>? profileEntries;
   String? briefing;
 
   MissionEntry({

@@ -52,3 +52,21 @@ enum canLeave {
   lastPlayer,
   error,
 }
+
+class DataSelection {
+  static const String menu = "Menu";
+  static const String social = "Social Media";
+  static const String messages = "Messages";
+  static const String images = "Images";
+  static const String audio = "Audio";
+  static const String videos = "Videos";
+  static const String maps = "Maps";
+  static const String reports = "Reports";
+  static const String socialFolder = "social";
+  static const String messagesFolder = "messages";
+  static const String imagesFolder = "images";
+  static const String audioFolder = "audio";
+  static const String videosFolder = "videos";
+  static const String mapsFolder = "maps";
+  static const String reportsFolder = "reports";
+}

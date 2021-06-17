@@ -98,7 +98,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
                               decoration: BoxDecoration(
                                 image: DecorationImage(
                                   image: AssetImage(
-                                      'assets/pictures/profile/${call.person.profileImage}'),
+                                      'assets/profile_pictures/${call.person.profileImage}'),
                                   fit: BoxFit.cover,
                                 ),
                               ),

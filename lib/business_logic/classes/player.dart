@@ -12,7 +12,7 @@ class Player {
     required this.uid,
     required this.color,
     required this.iconData,
-    required this.profileImage,
+    this.profileImage,
   });
 }
 

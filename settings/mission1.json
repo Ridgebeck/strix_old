@@ -9,41 +9,43 @@
             "firstRiddle": {
                 "data": {
                     "messages": [
-                        {
-                            "instagram": false,
-                            "name": "chat_1.png"
-                        },
-                        {
-                            "instagram": false,
-                            "name": "chat_2.png"
-                        },
-                        {
-                            "instagram": false,
-                            "name": "chat_3.png"
-                        },
-                        {
-                            "instagram": true,
-                            "name": "chat_4.png"
-                        },
-                        {
-                            "instagram": true,
-                            "name": "chat_5.png"
-                        },
-                        {
-                            "instagram": true,
-                            "name": "chat_6.png"
-                        }
+                        "chat_1.png",
+                        "chat_2.png",
+                        "chat_3.png",
+                        "chat_4.png",
+                        "chat_5.png",
+                        "chat_6.png"
                     ],
                     "pictures": [
                         "apartment_1.jpeg",
-                        "apartment_2.jpeg"
+                        "apartment_2.jpeg",
+                        "apartment_3.jpeg",
+                        "apartment_4.jpeg",
+                        "apartment_5.jpeg",
+                        "apartment_6.jpeg",
+                        "apartment_7.jpeg",
+                        "apartment_8.jpeg"
+                    ],
+                    "social": [
+                        "insta_1.png",
+                        "insta_2.png",
+                        "insta_3.png",
+                        "insta_4.png",
+                        "insta_5.png",
+                        "insta_6.png",
+                        "insta_7.png",
+                        "insta_8.png",
+                        "insta_9.png",
+                        "insta_10.png"
                     ]
                 },
                 "mission": {
                     "archivedCalls": [
                         "introCall"
                     ],
-                    "briefing": "A young man named Derek went missing.\\n\\nThe local police department was not able to locate him or his last activities. Friends of Derek insist that something must have happened to him and asked STRIX for help. It\u2019s been 3 days since the last time they could trace any activity from him and now we need your help. Time is running out\u2026 \\n\\nYou need to use your intelligence and analytical skills and help us solve this case. You will be teaming up with one of our best field agents John Mason who will be supporting you. Your goal is to understand what happened and reconstruct how and when he went missing and try to find Derek alive."
+                    "profiles": [
+                        "missingPerson"
+                    ]
                 }
             }
         },
@@ -54,6 +56,8 @@
         }
     ],
     "botAPIAddress": "http://34.69.81.214:8000/webhooks/rest/webhook",
+    "botPersonality": "fieldAgent1",
+    "briefing": "A young man named Derek went missing.\\n\\nThe local police department was not able to locate him or his last activities. Friends of Derek insist that something must have happened to him and asked STRIX for help. It's been 3 days since the last time they could trace any activity from him and now we need your help. Time is running out...\\n\\nYou need to use your intelligence and analytical skills and help us solve this case. You will be teaming up with one of our best field agents John Mason who will be supporting you. Your goal is to understand what happened and reconstruct how and when he went missing and try to find Derek alive.",
     "calls": {
         "firstRiddleSolved": {
             "callFile": "ipadSolved.mp4",
@@ -74,41 +78,63 @@
         {
             "color": "#0000FF",
             "iconNumber": 59565,
+            "isHuman": true,
             "name": "Noctis"
         },
         {
             "color": "#FF0000",
             "iconNumber": 59565,
+            "isHuman": true,
             "name": "Volantes"
         },
         {
             "color": "#00ff00",
             "iconNumber": 59565,
+            "isHuman": true,
             "name": "Ninox"
         },
         {
             "color": "#ff00d0",
             "iconNumber": 59565,
+            "isHuman": true,
             "name": "Silva"
         }
     ],
     "protagonists": {
         "director": {
+            "age": 47,
             "firstName": "Susan",
+            "hobbies": "not disclosed",
+            "instagram": "not disclosed",
+            "isHuman": false,
             "lastName": "Cooper",
+            "profession": "STRIX Director of Operations",
             "profileImage": "director.jpeg",
-            "title": "Director",
-            "uid": "doNotBreakDirectorBot"
+            "title": "Director"
         },
         "fieldAgent1": {
+            "age": 37,
             "color": "#42e0f5",
             "firstName": "John",
+            "hobbies": "solving stuff",
             "iconNumber": 66666,
-            "isBot": true,
+            "instagram": "@SuperAgent007",
+            "isHuman": false,
             "lastName": "Mason",
+            "profession": "STRIX Field Agent, Bay Area",
             "profileImage": "russ.jpeg",
-            "title": "Field Agent",
-            "uid": "doNotBreakAgentBot"
+            "title": "Field Agent"
+        },
+        "missingPerson": {
+            "age": 32,
+            "firstName": "Derek",
+            "hobbies": "chess, boardgames",
+            "instagram": "@McFlinty",
+            "isHuman": false,
+            "lastName": "Flint",
+            "profession": "Senior Programmer",
+            "profileImage": "derek.jpeg",
+            "title": "Missing Person"
         }
     }
 }

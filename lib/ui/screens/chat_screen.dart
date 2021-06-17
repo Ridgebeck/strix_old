@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:strix/business_logic/classes/chat.dart';
+import 'package:strix/business_logic/classes/player.dart';
 import 'package:strix/business_logic/classes/room.dart';
 import 'package:strix/business_logic/logic/chat_room_logic.dart';
 import 'package:strix/config/constants.dart';
@@ -46,8 +47,10 @@ class ChatScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       List<Message> reversedList = chatData.messages.reversed.toList();
                       Message message = reversedList[index];
-                      bool fromMe = _authorization.getCurrentUserID() == message.author.uid;
-                      bool fromTeam = !message.author.uid.startsWith('doNotBreak');
+                      bool fromTeam = message.author is Player;
+                      bool fromMe = fromTeam
+                          ? _authorization.getCurrentUserID() == message.author.uid
+                          : false;
                       bool delay =
                           (index == 0 && fromTeam == false && reversedList.length > 1 && newMessage)
                               ? true

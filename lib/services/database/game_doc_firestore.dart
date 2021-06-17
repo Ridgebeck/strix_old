@@ -44,6 +44,7 @@ class GameDocFirestore implements GameDoc {
         Map<String, dynamic> playerEntry = {
           'uid': _authorization.getCurrentUserID(),
           'name': firstPlayerValues['name'],
+          'isHuman': firstPlayerValues['isHuman'],
           'iconNumber': firstPlayerValues['iconNumber'],
           'color': firstPlayerValues['color'],
         };
@@ -104,7 +105,9 @@ class GameDocFirestore implements GameDoc {
         }
 
         // convert chat messages into standardized format
-        Chat chat = _convertChatData(snapData[kChatField]);
+        Chat chat = _convertChatData(
+            chatData: snapData[kChatField],
+            protagonists: snapData[kSettingsReference]['protagonists']);
 
         // convert available assets into standardized format
         List<AvailableAssetEntry> availableAssets = _convertAvailableAssets(snapData);
@@ -156,6 +159,9 @@ class GameDocFirestore implements GameDoc {
               lastName: callerMap['lastName'],
               profileImage: callerMap['profileImage'],
               title: callerMap['title'],
+              age: callerMap['age'],
+              profession: callerMap['profession'],
+              instagram: callerMap['instagram'],
             );
             Call currentCall = Call(
               callFile: callMap['callFile'],
@@ -169,30 +175,17 @@ class GameDocFirestore implements GameDoc {
             assetEntry.data = DataEntry();
             // go through data entry
             fieldData.forEach((dataField, dataFieldData) {
+              if (dataField == 'social' && snapData[kSettingsReference]['hasInstagram'] == false) {
+                print('Found social entry and group does not have insta');
+                assetEntry.data!.social = List.from(dataFieldData);
+              }
               if (dataField == 'messages') {
-                List<String> messagesToDisplay = [];
-                // check if someone in group has instagram
-                bool hasInstagram = snapData[kSettingsReference]['hasInstagram'];
-
-                // go through all message entries
-                dataFieldData.forEach((messageData) {
-                  // only add instagram messages if group doesn't have instagram
-                  if (messageData['instagram'] == true) {
-                    if (hasInstagram == false) {
-                      messagesToDisplay.add(messageData['name']);
-                    }
-                    // add all other messages normally
-                  } else {
-                    messagesToDisplay.add(messageData['name']);
-                  }
-                });
-
-                // save all messages that should be displayed in assetEntry format
-                assetEntry.data!.messages = messagesToDisplay;
+                print('Found messages entry');
+                assetEntry.data!.messages = List.from(dataFieldData);
               }
               if (dataField == 'pictures') {
                 print('Found pictures entry');
-                assetEntry.data!.pictures = List.from(dataFieldData);
+                assetEntry.data!.images = List.from(dataFieldData);
               }
               if (dataField == 'audioFiles') {
                 print('Found audioFiles entry');
@@ -215,11 +208,34 @@ class GameDocFirestore implements GameDoc {
             // add briefing to mission entry
             assetEntry.mission!.briefing = snapData[kSettingsReference][kBriefingReference];
 
-            // go through data entry
-            fieldData.forEach((dataField, dataFieldData) {
-              if (dataField == 'profile') {
-                print('Found profile entry');
-                assetEntry.mission!.profileEntries = fieldData['profile'];
+            // go through mission entry
+            fieldData.forEach((missionField, missionFieldData) {
+              if (missionField == 'profiles' && List.from(missionFieldData).isNotEmpty) {
+                print('Found profiles entry');
+
+                List<Person> profiles = [];
+                // go through all profiles
+                missionFieldData.forEach((profileName) {
+                  print(snapData[kSettingsReference]['protagonists'][profileName]['firstName']);
+
+                  // create person from reference string
+                  Person currentPerson = Person(
+                    firstName: snapData[kSettingsReference]['protagonists'][profileName]
+                        ['firstName'],
+                    lastName: snapData[kSettingsReference]['protagonists'][profileName]['lastName'],
+                    title: snapData[kSettingsReference]['protagonists'][profileName]['title'],
+                    profileImage: snapData[kSettingsReference]['protagonists'][profileName]
+                        ['profileImage'],
+                    age: snapData[kSettingsReference]['protagonists'][profileName]['age'],
+                    profession: snapData[kSettingsReference]['protagonists'][profileName]
+                        ['profession'],
+                    instagram: snapData[kSettingsReference]['protagonists'][profileName]
+                        ['instagram'],
+                  );
+
+                  profiles.add(currentPerson);
+                });
+                assetEntry.mission!.profileEntries = profiles;
               }
             });
           }
@@ -251,55 +267,76 @@ class GameDocFirestore implements GameDoc {
     return availableAssets;
   }
 
-  Chat _convertChatData(Map<String, dynamic> chatData) {
+  Chat _convertChatData({Map<String, dynamic>? chatData, Map<String, dynamic>? protagonists}) {
     List<Message> chatList = [];
     print('CONVERTING CHAT');
 
-    print('messages: ${chatData[kChatMessagesField].length}');
+    if (chatData == null) {
+      print('no chat data to convert');
+    } else {
+      print('messages: ${chatData[kChatMessagesField].length}');
 
-    for (int i = 0; i < chatData[kChatMessagesField].length; i++) {
-      try {
-        Map<String, dynamic> currentMessage = chatData[kChatMessagesField][i];
-        Map<String, dynamic> currentAuthor = currentMessage['author'];
+      for (int i = 0; i < chatData[kChatMessagesField].length; i++) {
+        try {
+          Map<String, dynamic> currentMessage = chatData[kChatMessagesField][i];
+          Map<String, dynamic> currentAuthor = currentMessage['author'];
 
-        Person? currentPerson;
-        Player? currentPlayer;
+          Person? currentPerson;
+          Player? currentPlayer;
 
-        // check if author is player or person
-        if (currentAuthor['uid'] != null) {
-          currentPlayer = Player(
-            name: currentAuthor['name'],
-            uid: currentAuthor['uid'],
-            color: HexColor.fromHex(currentAuthor['color']),
-            iconData: IconData(currentAuthor['iconNumber'], fontFamily: 'MaterialIcons'),
-            profileImage: currentAuthor['profileImage'],
+          if (currentAuthor.containsKey('uid')) {
+            print('Author has UID --> Human!');
+          }
+
+          // check if author is player or person
+          if (currentAuthor.containsKey('uid')) {
+            print('Player Message');
+            currentPlayer = Player(
+              name: currentAuthor['name'],
+              uid: currentAuthor['uid'],
+              color: HexColor.fromHex(currentAuthor['color']),
+              iconData: IconData(currentAuthor['iconNumber'], fontFamily: 'MaterialIcons'),
+            );
+          } else {
+            print('Person Message');
+
+            String authorName = currentAuthor['botPersonality'];
+
+            if (protagonists == null) {
+              print('Error - Protagonist section not found!');
+            } else {
+              if (protagonists[authorName] == null) {
+                print('Error - Protagonist $authorName could not be found!');
+              } else {
+                Map<String, dynamic> authorEntry = protagonists[authorName];
+
+                currentPerson = Person(
+                  firstName: authorEntry['firstName'],
+                  lastName: authorEntry['lastName'],
+                  title: authorEntry['title'],
+                  profileImage: authorEntry['profileImage'],
+                  age: authorEntry['age'],
+                  profession: authorEntry['profession'],
+                  hobbies: authorEntry['hobbies'],
+                  instagram: authorEntry['instagram'],
+                  color: HexColor.fromHex(authorEntry['color']),
+                );
+              }
+            }
+          }
+
+          chatList.add(
+            Message(
+              text: currentMessage['text'],
+              profileImage: currentMessage['profileImage'],
+              image: currentMessage['image'],
+              author: currentPlayer != null ? currentPlayer : currentPerson,
+              time: currentMessage['time'].toDate(),
+            ),
           );
-        } else {
-          // TODO: Use current author values from Firestore
-          currentPerson = Person(
-            firstName: 'Russ',
-            //currentAuthor['firstName'],
-            lastName: 'Hanneman',
-            //currentAuthor['lastName'],
-            title: 'Field Agent',
-            //currentAuthor['title'],
-            profileImage: 'test.jpg',
-            //currentAuthor['profileImage'],
-            color: Colors.red, //HexColor.fromHex(currentAuthor['color']),
-          );
+        } catch (e) {
+          print('Could not convert message. Error: $e');
         }
-
-        chatList.add(
-          Message(
-            text: currentMessage['text'],
-            profileImage: currentMessage['profileImage'],
-            image: currentMessage['image'],
-            author: currentPlayer != null ? currentPlayer : currentPerson,
-            time: currentMessage['time'].toDate(),
-          ),
-        );
-      } catch (e) {
-        print('Could not convert message. Error: $e');
       }
     }
     return Chat(messages: chatList);
@@ -527,14 +564,15 @@ class GameDocFirestore implements GameDoc {
 
   @override
   void addMessage({required Message message, required String roomID}) async {
+    // needed to store color before converting to hex
     Color authorColor = message.author.color;
 
     List<dynamic> messageList = [
       {
         'text': message.text,
-        'profileImage': message.profileImage,
         'author': {
           'name': message.author.name,
+          'profileImage': message.profileImage,
           'uid': message.author.uid,
           'color': authorColor.toHex(),
           'iconNumber': message.author.iconData.codePoint,

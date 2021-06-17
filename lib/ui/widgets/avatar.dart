@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:strix/business_logic/classes/chat.dart';
+import 'package:strix/ui/screens/profile_screen.dart';
 
 class Avatar extends StatelessWidget {
   const Avatar({
@@ -34,7 +35,7 @@ class Avatar extends StatelessWidget {
             : BoxDecoration(
                 shape: BoxShape.circle,
                 image: DecorationImage(
-                    image: AssetImage('assets/pictures/profile/' + message.author.profileImage),
+                    image: AssetImage('assets/profile_pictures/' + message.author.profileImage),
                     fit: BoxFit.cover),
               ),
         child: fromTeam
@@ -43,7 +44,16 @@ class Avatar extends StatelessWidget {
                 color: Colors.white,
                 size: MediaQuery.of(context).size.width * coloredIconSize * 0.7,
               )
-            : Container(),
+            : RawMaterialButton(
+                onPressed: () {
+                  print(message.author);
+
+                  Navigator.of(context).pushNamed(
+                    ProfileScreen.route_id,
+                    arguments: message.author,
+                  );
+                },
+              ),
       ),
     );
   }

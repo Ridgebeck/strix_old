@@ -32,7 +32,7 @@ class _DelayedImageMessageState extends State<DelayedImageMessage> {
       text = 'typing...';
     });
     _typingTimer =
-        new Timer(Duration(milliseconds: 500 + 500 + widget.message.text.length * 45), () {
+        new Timer(Duration(milliseconds: 500 + 500 + widget.message.text.length * 35), () {
       setState(() {
         text = widget.message.text;
       });

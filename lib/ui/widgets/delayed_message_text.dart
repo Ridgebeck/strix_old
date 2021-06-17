@@ -28,7 +28,7 @@ class _DelayedMessageTextState extends State<DelayedMessageText> {
     setState(() {
       text = 'typing...';
     });
-    _typingTimer = new Timer(Duration(milliseconds: 500 + widget.message.text.length * 40), () {
+    _typingTimer = new Timer(Duration(milliseconds: 500 + widget.message.text.length * 35), () {
       setState(() {
         text = widget.message.text;
       });

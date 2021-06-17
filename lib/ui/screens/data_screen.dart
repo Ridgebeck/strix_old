@@ -16,7 +16,7 @@ class DataScreen extends StatefulWidget {
 
 class _DataScreenState extends State<DataScreen> {
   final int numberOfCards = 4;
-  String selection = "Menu";
+  String selection = DataSelection.menu;
 
   void changeSelection(String value) {
     setState(() {
@@ -55,31 +55,58 @@ class _DataScreenState extends State<DataScreen> {
 
 Widget displaySelection(String selection, Function changeSelection, AvailableAssetEntry assets) {
   switch (selection) {
-    case "Menu":
+    case DataSelection.menu:
       {
         return DataScreenMenu(changeSelection: changeSelection, data: assets.data);
       }
-    case "Reports":
+    case DataSelection.reports:
       {
         //return ReportsScreen(changeSelection: changeSelection);
-        return DataSelectionScreen(changeSelection: changeSelection, data: assets.data!.reports!);
+        return DataSelectionScreen(
+          changeSelection: changeSelection,
+          data: assets.data!.reports!,
+          folder: DataSelection.reportsFolder,
+        );
       }
-    case "Messages":
-      {
-        return DataSelectionScreen(changeSelection: changeSelection, data: assets.data!.messages!);
-      }
-    case "Images":
-      {
-        return DataSelectionScreen(changeSelection: changeSelection, data: assets.data!.pictures!);
-      }
-    case "Videos":
-      {
-        return DataSelectionScreen(changeSelection: changeSelection, data: assets.data!.videos!);
-      }
-    case "Audio":
+    case DataSelection.social:
       {
         return DataSelectionScreen(
-            changeSelection: changeSelection, data: assets.data!.audioFiles!);
+          changeSelection: changeSelection,
+          data: assets.data!.social!,
+          folder: DataSelection.socialFolder,
+        );
+      }
+    case DataSelection.messages:
+      {
+        return DataSelectionScreen(
+          changeSelection: changeSelection,
+          data: assets.data!.messages!,
+          folder: DataSelection.messagesFolder,
+        );
+      }
+    case DataSelection.images:
+      {
+        return DataSelectionScreen(
+          changeSelection: changeSelection,
+          data: assets.data!.images!,
+          folder: DataSelection.imagesFolder,
+        );
+      }
+    case DataSelection.videos:
+      {
+        return DataSelectionScreen(
+          changeSelection: changeSelection,
+          data: assets.data!.videos!,
+          folder: DataSelection.videosFolder,
+        );
+      }
+    case DataSelection.audio:
+      {
+        return DataSelectionScreen(
+          changeSelection: changeSelection,
+          data: assets.data!.audioFiles!,
+          folder: DataSelection.audioFolder,
+        );
       }
     default:
       {
@@ -88,134 +115,13 @@ Widget displaySelection(String selection, Function changeSelection, AvailableAss
   }
 }
 
-class ReportsScreen extends StatefulWidget {
-  final Function changeSelection;
-  const ReportsScreen({
-    required this.changeSelection,
-  });
-
-  @override
-  _ReportsScreenState createState() => _ReportsScreenState();
-}
-
-class _ReportsScreenState extends State<ReportsScreen> {
-  static const List<String> headers = [
-    'City',
-    'Population',
-    'Land Area',
-    'Density',
-  ];
-
-  static const List<String> cities = [
-    'New York',
-    'Los Angles',
-    'Chicago',
-  ];
-
-  static const List<double> population = [
-    1,
-    2,
-    3,
-  ];
-
-  static const List<double> area = [
-    100,
-    200,
-    300,
-  ];
-
-  static const List<double> density = [
-    1000,
-    2000,
-    3000,
-  ];
-
-  List<bool> selected = List<bool>.generate(cities.length, (int index) => false);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      //color: Colors.greenAccent,
-      child: Column(
-        children: [
-          Expanded(
-            child: TextButton(
-              onPressed: () {
-                widget.changeSelection('Menu');
-              },
-              child: Center(child: Text('Back')),
-            ),
-          ),
-          Expanded(
-            flex: 9,
-            child: Container(
-              //color: Colors.red,
-              child: RotatedBox(
-                quarterTurns: 0,
-                child: DataTable(
-                  showCheckboxColumn: false,
-                  columnSpacing: 20.0,
-                  columns: List<DataColumn>.generate(
-                    headers.length,
-                    (int index) => DataColumn(label: Text(headers[index]), numeric: false),
-                  ),
-
-                  // [
-                  //   DataColumn(label: Text('City'), numeric: false),
-                  //   // DataColumn(label: Text('Population'), numeric: true),
-                  //   // DataColumn(label: Text('Area'), numeric: true),
-                  //   // DataColumn(label: Text('Density'), numeric: true),
-                  // ],
-                  rows: List<DataRow>.generate(
-                    cities.length,
-                    (int index) => DataRow(
-                      color: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-                        // All rows will have the same selected color.
-                        if (states.contains(MaterialState.selected)) {
-                          return Colors.greenAccent;
-                        }
-                        // Even rows will have a grey color.
-                        if (index.isEven) {
-                          return Colors.grey.withOpacity(0.3);
-                        }
-                        return null; // Use default value for other states and odd rows.
-                      }),
-                      cells: <DataCell>[
-                        DataCell(
-                          Text(
-                            cities[index],
-                            style: selected[index]
-                                ? TextStyle(decoration: TextDecoration.lineThrough)
-                                : TextStyle(),
-                          ),
-                        ),
-                        DataCell(Text(population[index].toString())),
-                        DataCell(Text(area[index].toString())),
-                        DataCell(Text(density[index].toString())),
-                      ],
-                      selected: selected[index],
-                      onSelectChanged: (bool? value) {
-                        setState(() {
-                          selected[index] = value!;
-                        });
-                      },
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class DataSelectionScreen extends StatelessWidget {
   final Function changeSelection;
+  final String folder;
   final List<String> data;
   const DataSelectionScreen({
     required this.changeSelection,
+    required this.folder,
     required this.data,
   });
 
@@ -228,7 +134,7 @@ class DataSelectionScreen extends StatelessWidget {
             flex: 1,
             child: TextButton(
               onPressed: () {
-                changeSelection('Menu');
+                changeSelection(DataSelection.menu);
               },
               child: Text('BACK'),
             ),
@@ -253,7 +159,7 @@ class DataSelectionScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.of(context).pushNamed(
                         PictureScreen.route_id,
-                        arguments: data[index],
+                        arguments: folder + '/' + data[index],
                       );
                     },
                     child: Neumorphic(
@@ -267,7 +173,7 @@ class DataSelectionScreen extends StatelessWidget {
                           image: DecorationImage(
                             fit: BoxFit.cover,
                             image: AssetImage(
-                              'assets/pictures/' + data[index],
+                              'assets/data/' + folder + '/' + data[index],
                             ),
                           ),
                         ),
@@ -308,38 +214,45 @@ class DataScreenMenu extends StatelessWidget {
                 ? Container() // TODO: What to show when no data at all is present?
                 : Column(
                     children: [
+                      data!.social == null
+                          ? Container()
+                          : MenuTile(
+                              selectedDataType: DataSelection.social,
+                              iconData: Icons.person,
+                              changeSelection: changeSelection,
+                            ),
                       data!.messages == null
                           ? Container()
                           : MenuTile(
-                              title: 'Messages',
-                              iconData: Icons.message,
+                              selectedDataType: DataSelection.messages,
+                              iconData: Icons.message_outlined,
                               changeSelection: changeSelection,
                             ),
-                      data!.pictures == null
+                      data!.images == null
                           ? Container()
                           : MenuTile(
-                              title: 'Images',
+                              selectedDataType: DataSelection.images,
                               iconData: Icons.camera_alt,
                               changeSelection: changeSelection,
                             ),
                       data!.videos == null
                           ? Container()
                           : MenuTile(
-                              title: 'Videos',
+                              selectedDataType: DataSelection.videos,
                               iconData: Icons.video_collection,
                               changeSelection: changeSelection,
                             ),
                       data!.audioFiles == null
                           ? Container()
                           : MenuTile(
-                              title: 'Audio',
                               iconData: Icons.audiotrack_outlined,
+                              selectedDataType: DataSelection.audio,
                               changeSelection: changeSelection,
                             ),
                       data!.reports == null
                           ? Container()
                           : MenuTile(
-                              title: 'Reports',
+                              selectedDataType: DataSelection.reports,
                               iconData: Icons.folder_open,
                               changeSelection: changeSelection,
                             ),
@@ -362,12 +275,12 @@ class DataScreenMenu extends StatelessWidget {
 
 class MenuTile extends StatelessWidget {
   final IconData iconData;
-  final String title;
+  final String selectedDataType;
   final Function changeSelection;
   const MenuTile({
     Key? key,
     required this.iconData,
-    required this.title,
+    required this.selectedDataType,
     required this.changeSelection,
   }) : super(key: key);
 
@@ -384,7 +297,7 @@ class MenuTile extends StatelessWidget {
             intensity: 0.8,
           ),
           onPressed: () {
-            changeSelection(title);
+            changeSelection(selectedDataType);
           },
           provideHapticFeedback: true,
           child: Column(
@@ -429,7 +342,7 @@ class MenuTile extends StatelessWidget {
                                 alignment: Alignment.centerLeft,
                                 child: FittedBox(
                                   child: Text(
-                                    title,
+                                    selectedDataType,
                                     style: TextStyle(
                                       fontSize: 50.0,
                                       color: Colors.blueGrey[600],
